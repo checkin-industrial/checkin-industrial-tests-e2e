@@ -1,0 +1,80 @@
+name: checkin-industrial-e2e
+
+services:
+  # ─── Banco de Dados ─────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: checkin-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-turismoindustrial}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-turismoindustrial}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - checkin-net
+
+  # ─── Backend (.NET 9 + EF Core) ─────────────────────────────────────────────
+  # Usa o Dockerfile que já existe em checkin-industrial-api/api/Dockerfile.
+  # Migrations rodam automaticamente no startup (Program.cs:62), por isso o
+  # service_healthy do postgres é obrigatório.
+  api:
+    container_name: checkin-api
+    restart: unless-stopped
+    build:
+      context: ../../checkin-industrial-api
+      dockerfile: Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
+      ASPNETCORE_URLS: http://+:8080
+      PORT: "8080"
+      # .NET binding convention: __ vira : ao ler ConnectionStrings:DefaultConnectionTurismo
+      ConnectionStrings__DefaultConnectionTurismo: "Server=postgres;Port=5432;Database=${POSTGRES_DB:-turismoindustrial};User Id=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres};"
+      # Habilita servir /uploads a partir do volume montado abaixo (Program.cs:81)
+      UPLOADS_ROOT: /uploads
+    volumes:
+      - api_uploads:/uploads
+    ports:
+      - "${API_PORT:-8080}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - checkin-net
+
+  # ─── Frontend (React + Vite, servido por nginx) ─────────────────────────────
+  # Build context fica na pasta docker-compose (para acessar nginx.conf e o
+  # Dockerfile sem poluir o repo do painel). O código-fonte do painel é
+  # disponibilizado como additional_context chamado 'painel'.
+  painel:
+    container_name: checkin-painel
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: painel.Dockerfile
+      additional_contexts:
+        painel: ../../checkin-industrial-painel
+    ports:
+      - "${PAINEL_PORT:-8081}:80"
+    depends_on:
+      - api
+    networks:
+      - checkin-net
+
+volumes:
+  postgres_data:
+    driver: local
+  api_uploads:
+    driver: local
+
+networks:
+  checkin-net:
+    driver: bridge
