@@ -1,0 +1,12 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"Cria → busca por id → lista → atualiza → confirma update → deleta → confirma deletado.","679","Telefones Uteis - CRUD completo","","Sat May 23 23:47:38 UTC 2026","passed","Sat May 23 23:47:38 UTC 2026","Caminho Feliz","Suites","",""
+"Confirma que com a chave correta o pipeline completa (201) e a entidade
+pode ser lida em seguida e removida.","25","Write com X-Api-Key valido segue normalmente","","Sat May 23 23:47:39 UTC 2026","passed","Sat May 23 23:47:39 UTC 2026","Auth Api Key","Suites","",""
+"Cria dois pontos de tipos diferentes, lista filtrando por tipo, deleta.","122","Pontos Institucionais - CRUD com filtro por tipo","","Sat May 23 23:47:39 UTC 2026","passed","Sat May 23 23:47:39 UTC 2026","Caminho Feliz","Suites","",""
+"Cria duas empresas em coordenadas proximas e valida que a busca de vizinhos
+retorna a segunda como vizinha da primeira. Cobre filter + neighbors + delete.","303","Empresas - Criar, filtrar e buscar vizinhos","","Sat May 23 23:47:38 UTC 2026","passed","Sat May 23 23:47:39 UTC 2026","Caminho Feliz","Suites","",""
+"POST com header X-Api-Key contendo valor incorreto tambem deve ser 401.
+FixedTimeEquals no handler garante constant-time check; aqui so importa o status.","12","Write com X-Api-Key invalido retorna 401","","Sat May 23 23:47:39 UTC 2026","passed","Sat May 23 23:47:39 UTC 2026","Auth Api Key","Suites","",""
+"POST sem header X-Api-Key deve ser rejeitado pelo middleware
+de autenticacao antes mesmo de chegar no handler.","7","Write sem X-Api-Key retorna 401","","Sat May 23 23:47:39 UTC 2026","passed","Sat May 23 23:47:39 UTC 2026","Auth Api Key","Suites","",""
+"GET /api/telefones-uteis sem nenhum header de auth deve retornar 200.","8","Read anonimo continua acessivel","","Sat May 23 23:47:39 UTC 2026","passed","Sat May 23 23:47:39 UTC 2026","Auth Api Key","Suites","",""
