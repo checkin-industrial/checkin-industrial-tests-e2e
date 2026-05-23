@@ -16,18 +16,18 @@ Criar Empresa
     ...    razaoSocial=${nome_fantasia} LTDA
     ...    nomeFantasia=${nome_fantasia}
     ...    cnaePrincipal=4751201
-    ...    setor=1
-    ...    porte=2
+    ...    setor=${1}
+    ...    porte=${2}
     ...    numeroFuncionarios=${10}
     ...    endereco=Av Paulista, 1578
     ...    telefone=1133334444
     ...    cep=01310200
     ...    municipio=Sao Paulo
     ...    descricaoCnae=Comercio varejista de equipamentos de informatica
-    ...    matrizOuFilial=1
-    ...    latitude=${latitude}
-    ...    longitude=${longitude}
-    ...    situacaoCadastral=1
+    ...    matrizOuFilial=${1}
+    ...    latitude=${{float($latitude)}}
+    ...    longitude=${{float($longitude)}}
+    ...    situacaoCadastral=${1}
     ${headers}=    Headers Com Api Key
     ${response}=    POST    ${API_URL}/api/empresas    json=${body}    headers=${headers}    expected_status=201
     ${id}=    Get From Dictionary    ${response.json()}    id

@@ -11,11 +11,11 @@ Criar Ponto Institucional
     [Arguments]    ${nome}    ${tipo}=1    ${latitude}=-23.55052    ${longitude}=-46.633308
     ${body}=    Create Dictionary
     ...    nome=${nome}
-    ...    tipo=${tipo}
+    ...    tipo=${{int($tipo)}}
     ...    descricao=Ponto criado pela suite E2E
     ...    endereco=Av Paulista, 1000
-    ...    latitude=${latitude}
-    ...    longitude=${longitude}
+    ...    latitude=${{float($latitude)}}
+    ...    longitude=${{float($longitude)}}
     ...    ativo=${TRUE}
     ${headers}=    Headers Com Api Key
     ${response}=    POST    ${API_URL}/api/pontos-institucionais    json=${body}    headers=${headers}    expected_status=201

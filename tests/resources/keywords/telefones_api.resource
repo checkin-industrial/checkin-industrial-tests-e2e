@@ -8,10 +8,12 @@ Variables   ../variables/env.yaml
 *** Keywords ***
 Criar Telefone Util
     [Documentation]    Cria um telefone util. Retorna o id gerado.
+    ...    `categoria` deve ser o valor int do enum CategoriaTelefoneUtil
+    ...    (1=EmergenciaServicosPublicos, 2=TransporteCultura, 3=HoteisPousadas).
     [Arguments]    ${nome}    ${categoria}=1    ${telefone}=193
     ${body}=    Create Dictionary
     ...    nome=${nome}
-    ...    categoria=${categoria}
+    ...    categoria=${{int($categoria)}}
     ...    telefone=${telefone}
     ...    ativo=${TRUE}
     ${headers}=    Headers Com Api Key
@@ -32,7 +34,7 @@ Atualizar Telefone Util
     [Arguments]    ${id}    ${nome}    ${categoria}=1    ${telefone}=193
     ${body}=    Create Dictionary
     ...    nome=${nome}
-    ...    categoria=${categoria}
+    ...    categoria=${{int($categoria)}}
     ...    telefone=${telefone}
     ...    ativo=${TRUE}
     ${headers}=    Headers Com Api Key

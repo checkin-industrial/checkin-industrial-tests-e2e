@@ -33,8 +33,11 @@ Telefones Uteis - CRUD completo
     ${atualizado}=    Buscar Telefone Util    ${id}
     Should Be Equal As Strings    ${atualizado['nome']}    ${nome} atualizado
 
+    # DELETE em Telefones eh soft delete (TelefoneUtilService.RemoverAsync seta Ativo=false).
+    # Por isso o GET segue retornando 200 e o ativo vira false.
     Deletar Telefone Util    ${id}
-    ${depois}=    GET    ${API_URL}/api/telefones-uteis/${id}    expected_status=404
+    ${depois}=    Buscar Telefone Util    ${id}
+    Should Be Equal    ${depois['ativo']}    ${FALSE}
 
 
 Empresas - Criar, filtrar e buscar vizinhos
