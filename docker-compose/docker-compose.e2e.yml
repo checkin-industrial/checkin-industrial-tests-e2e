@@ -1,0 +1,83 @@
+name: checkin-industrial-e2e
+
+# Stack E2E (postgres + api) configurada para teste:
+# - Auth__ApiKey: chave fixa que keywords injetam no header X-Api-Key.
+# - OutputCache: TTL 0 elimina respostas cached que mascariam mutacoes assertadas.
+# - RateLimit: limites altos pra suite inteira nao bater 429 (60/min default eh
+#   muito baixo para teste).
+# - ASPNETCORE_ENVIRONMENT=Development mantem CORS aberto e nao requer config
+#   adicional de origens; o fail-fast do Program.cs so dispara em Production.
+#
+# Painel NAO entra aqui: testes E2E sao API-level. Para subir o painel use
+# o docker-compose.yml padrao.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: checkin-e2e-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-turismoindustrial}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_e2e_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-turismoindustrial}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - e2e-net
+
+  api:
+    container_name: checkin-e2e-api
+    restart: unless-stopped
+    # Padrao: usa imagem publicada no Docker Hub (rapido + reproduzivel).
+    # `build:` fica como fallback para dev local sem precisar publicar:
+    #   docker compose -f docker-compose/docker-compose.e2e.yml build api
+    # Em CI, garantir pull fresh: `docker compose ... up --pull always`.
+    image: ${CHECKIN_API_IMAGE:-rogeriogelonezi/checkin-industrial-api}:${API_IMAGE_TAG:-latest}
+    build:
+      context: ../../checkin-industrial-api
+      dockerfile: Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      PORT: "8080"
+      ConnectionStrings__DefaultConnectionTurismo: "Server=postgres;Port=5432;Database=${POSTGRES_DB:-turismoindustrial};User Id=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres};"
+      Auth__ApiKey: ${E2E_API_KEY:-e2e-api-key-checkin-industrial-2026}
+      OutputCache__ReadEndpointTtlSeconds: "0"
+      RateLimit__AnonymousPermitPerMinute: "10000"
+      RateLimit__AuthenticatedPermitPerMinute: "10000"
+      UPLOADS_ROOT: /uploads
+    volumes:
+      - api_e2e_uploads:/uploads
+    ports:
+      - "${API_PORT:-8080}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      # TCP probe via bash exec — funciona em qualquer aspnet:10.0 sem precisar
+      # de wget/curl no runtime. /health propriamente eh validado pelo Robot
+      # como primeiro keyword da suite (Aguardar API Disponivel).
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8080"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 20s
+    networks:
+      - e2e-net
+
+volumes:
+  postgres_e2e_data:
+    driver: local
+  api_e2e_uploads:
+    driver: local
+
+networks:
+  e2e-net:
+    driver: bridge
