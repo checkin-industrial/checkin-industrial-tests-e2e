@@ -1,17 +1,9 @@
-# Env files com valores reais (.env.example fica versionado)
-.env
-.env.local
-.env.*.local
-docker-compose/.env
-
-# Logs
-*.log
-
-# Editor / IDE
-.vscode/
-.idea/
-
-# OS
-.DS_Store
-Thumbs.db
-desktop.ini
+results/
+results-dryrun/
+allure-results/
+allure-history/
+allure-report/
+gh-pages/
+__pycache__/
+*.pyc
+.venv/
