@@ -1,4 +1,3 @@
 # Code Owners do repositorio
-# Hoje aponta direto para o owner da org. Quando a team
-# 'maintainers' for criada, trocar por: * @checkin-industrial/maintainers
-* @gelonezi
+# Members da team 'maintainers' podem aprovar PRs e mergear para main
+* @checkin-industrial/maintainers
