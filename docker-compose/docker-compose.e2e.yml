@@ -39,7 +39,7 @@ services:
     # `build:` fica como fallback para dev local sem precisar publicar:
     #   docker compose -f docker-compose/docker-compose.e2e.yml build api
     # Em CI, garantir pull fresh: `docker compose ... up --pull always`.
-    image: ${CHECKIN_API_IMAGE:-rogeriogelonezi/checkin-industrial-api}:${API_IMAGE_TAG:-latest}
+    image: ${CHECKIN_API_IMAGE:-checkinindustrial/checkin-industrial-api}:${API_IMAGE_TAG:-latest}
     build:
       context: ../../checkin-industrial-api
       dockerfile: Dockerfile

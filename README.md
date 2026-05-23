@@ -17,7 +17,7 @@ ficam para PRs subsequentes — esta primeira leva existe pra provar a infra pon
 
 - Docker 24+ com Docker Compose v2
 - Python 3.11+
-- Acesso ao Docker Hub (puxa `rogeriogelonezi/checkin-industrial-api:latest`
+- Acesso ao Docker Hub (puxa `checkinindustrial/checkin-industrial-api:latest`
   automaticamente — a tag eh publicada pelo workflow `publish-docker.yml`
   do repo `checkin-industrial-api` em cada push pra `main`).
 
@@ -136,7 +136,7 @@ checkin-industrial-tests-e2e/
 Workflow `.github/workflows/e2e-tests.yml`:
 
 - Roda em push (`main`, `feature/**`, `refactor/**`), PR contra `main` e `workflow_dispatch`.
-- Puxa `rogeriogelonezi/checkin-industrial-api:${API_IMAGE_TAG}` do Docker Hub (default
+- Puxa `checkinindustrial/checkin-industrial-api:${API_IMAGE_TAG}` do Docker Hub (default
   `:latest`). A tag eh configuravel via variavel de repo `API_IMAGE_TAG` para fixar uma
   versao especifica (ex: `sha-abc1234`) em builds determinasticos.
 - Sobe Docker Compose, roda `robot tests/suites/`, gera Allure via CLI direta, publica em
@@ -146,7 +146,7 @@ Workflow `.github/workflows/e2e-tests.yml`:
 
 ### Pre-requisito: imagem da API publicada
 
-A imagem da API precisa estar disponivel em `rogeriogelonezi/checkin-industrial-api` no
+A imagem da API precisa estar disponivel em `checkinindustrial/checkin-industrial-api` no
 Docker Hub. O workflow `publish-docker.yml` no repo `checkin-industrial-api` publica
 automaticamente em todo push para `main` e em tags `v*.*.*`.
 
@@ -162,13 +162,13 @@ Para configurar o publish-docker.yml no repo da API:
 
    | Tipo | Nome | Valor |
    |---|---|---|
-   | Variable | `DOCKERHUB_USERNAME` | username do Docker Hub (ex: `rogeriogelonezi`) |
+   | Variable | `DOCKERHUB_USERNAME` | username do Docker Hub (ex: `checkinindustrial`) |
    | Secret | `DOCKERHUB_TOKEN` | o access token gerado no passo 1 |
    | Variable | `DOCKERHUB_NAMESPACE` | (opcional) namespace se diferente do username |
    | Variable | `IMAGE_NAME` | (opcional) nome do repo no Docker Hub. Default `checkin-industrial-api` |
 
 3. Apos o primeiro push em main, conferir que a tag apareceu em
-   <https://hub.docker.com/r/rogeriogelonezi/checkin-industrial-api/tags>.
+   <https://hub.docker.com/r/checkinindustrial/checkin-industrial-api/tags>.
 
 ## Convencoes
 
