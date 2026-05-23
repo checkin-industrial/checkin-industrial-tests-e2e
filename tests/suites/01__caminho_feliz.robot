@@ -61,9 +61,12 @@ Empresas - Criar, filtrar e buscar vizinhos
     ${ids_vizinhos}=    Evaluate    [v['id'] for v in $vizinhanca['empresasProximas']]
     Should Contain    ${ids_vizinhos}    ${id_vizinha}
 
+    # DELETE em Empresas eh soft delete (EmpresaService.RemoverAsync seta Ativo=false),
+    # consistente com Telefones e Pontos. GET segue retornando 200 e ativo vira false.
     Deletar Empresa    ${id_base}
     Deletar Empresa    ${id_vizinha}
-    GET    ${API_URL}/api/empresas/${id_base}    expected_status=404
+    ${depois}=    Buscar Empresa    ${id_base}
+    Should Be Equal    ${depois['ativo']}    ${FALSE}
 
 
 Pontos Institucionais - CRUD com filtro por tipo
