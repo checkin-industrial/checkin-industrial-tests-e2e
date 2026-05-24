@@ -123,12 +123,15 @@ Reativar empresa inativa via UI: volta ao estado ativo
 
     Click    ${reativar_btn}
 
-    # Sumiu do filtro inativo
-    Wait For Elements State    text=${nome}    hidden    timeout=10s
+    # Sumiu do filtro inativo. Match no <strong> da row (e nao text=${nome})
+    # porque a mensagem de sucesso "Empresa '<nome>' reativada com sucesso"
+    # tambem contem o nome e Playwright `text=` faz substring match - o <p>
+    # da mensagem nunca fica hidden, o wait nunca termina.
+    Wait For Elements State    xpath=//strong[normalize-space()="${nome}"]    hidden    timeout=10s
 
     # Aparece no filtro ativo
     Aplicar Filtro Status Admin    ativo
-    Wait For Elements State    text=${nome}    visible    timeout=10s
+    Wait For Elements State    xpath=//strong[normalize-space()="${nome}"]    visible    timeout=10s
 
     # API confirma status ativo
     ${detalhe}=    Buscar Empresa    ${id}
