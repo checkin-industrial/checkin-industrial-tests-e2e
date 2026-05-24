@@ -50,11 +50,18 @@ Form de import dispara busca e mostra resultados
 
 
 Import com criados aparece em "Aguardando revisao" na Gestao Empresas
-    [Documentation]    Login admin -> importar tipo "loja" -> WireMock devolve
-    ...                2 lugares -> ambos sao criados com Status=AguardandoRevisao
-    ...                -> clica em "Ir para revisar" -> redireciona pra Gestao
-    ...                Empresas -> filtra aguardando-revisao -> verifica que
-    ...                as empresas criadas aparecem.
+    [Documentation]    Login admin -> importar tipo "banco" -> WireMock devolve
+    ...                1 lugar com PlaceId proprio pra UI (nao colide com suite
+    ...                04 que usa tipo=loja+supermercado) -> empresa criada com
+    ...                Status=AguardandoRevisao -> clica em "Ir para revisar"
+    ...                -> redireciona pra Gestao Empresas -> filtra
+    ...                aguardando-revisao -> verifica que aparece.
+    ...
+    ...                Tipo "banco" exclusivo pra essa suite porque outros tipos
+    ...                ja tem PlaceIds gravados no banco por runs anteriores
+    ...                (soft delete preserva GooglePlaceId, dedup nao cria
+    ...                novas). Sem PlaceId fresco, result.criados=0 e o botao
+    ...                "Ir para revisar" nao renderiza.
     [Tags]    ui    google-maps    import    aprovacao    e2e
 
     Abrir Painel Pagina Inicial
@@ -62,7 +69,7 @@ Import com criados aparece em "Aguardando revisao" na Gestao Empresas
     Wait For Elements State    text="Importar Empresas do Google Maps"    visible    timeout=15s
 
     Fill Text    css=input[placeholder="17012000"]    ${CEP_BAURU}
-    Select Options By    css=select    value    loja
+    Select Options By    css=select    value    banco
     Click    css=button[type="submit"]
 
     Wait For Elements State    text="Resultado da importação"    visible    timeout=15s
@@ -74,11 +81,11 @@ Import com criados aparece em "Aguardando revisao" na Gestao Empresas
     Wait For Elements State    text="Empresas Cadastradas"    visible    timeout=15s
     # Aplica filtro pra ver so AguardandoRevisao
     Aplicar Filtro Status Admin    aguardando-revisao
-    # Mapping retorna "Loja E2E Alfa" e "Loja E2E Beta" - confere o primeiro
-    Wait For Elements State    text="Loja E2E Alfa"    visible    timeout=10s
+    # Mapping retorna "Banco UI Test Alfa"
+    Wait For Elements State    text="Banco UI Test Alfa"    visible    timeout=10s
 
-    # Cleanup: pega ids das empresas com GooglePlaceId conhecido e deleta
-    ${ativas}=    Filtrar Empresas    nomeFantasia=Loja E2E    status=aguardando-revisao
+    # Cleanup: pega ids das empresas criadas nesse mapping e deleta
+    ${ativas}=    Filtrar Empresas    nomeFantasia=Banco UI Test    status=aguardando-revisao
     FOR    ${empresa}    IN    @{ativas}
         Deletar Empresa    ${empresa['id']}
     END
