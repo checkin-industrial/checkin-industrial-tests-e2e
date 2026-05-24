@@ -1,0 +1,25 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/places:searchNearby",
+    "bodyPatterns": [
+      { "matchesJsonPath": "$.includedTypes[?(@ == 'bank')]" }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "places": [
+        {
+          "id": "ChIJE2E_UI_banco_001",
+          "displayName": { "text": "Banco UI Test Alfa" },
+          "formattedAddress": "Av Bauru, 900 - Centro, Bauru - SP",
+          "location": { "latitude": -22.31490, "longitude": -49.06080 },
+          "types": ["bank"],
+          "nationalPhoneNumber": "(14) 3000-3001"
+        }
+      ]
+    }
+  }
+}

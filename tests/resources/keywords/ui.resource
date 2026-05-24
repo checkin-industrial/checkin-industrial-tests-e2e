@@ -37,6 +37,19 @@ Logar Como Admin
 
 
 Fechar Browser
-    [Documentation]    Teardown padrao - usar como Test Teardown (ou Suite
-    ...                Teardown se reusar o context entre tests).
+    [Documentation]    Teardown padrao - usar como Test Teardown. Se o test
+    ...                falhou, captura screenshot full-page antes de fechar.
+    ...                Salva em ${OUTPUT_DIR}/browser/screenshot/* e vira
+    ...                artifact do CI no upload-artifact (results/).
+    Run Keyword If Test Failed    Take Screenshot    fullPage=True
     Close Browser    ALL
+
+
+Aplicar Filtro Status Admin
+    [Documentation]    Na tela Gestao Empresas, troca o dropdown de status para
+    ...                o valor solicitado e espera a tabela recarregar.
+    ...                Valores aceitos: ativo, inativo, aguardando-revisao, todos.
+    [Arguments]    ${status_value}
+    Select Options By    css=select[aria-label="Filtro de status"]    value    ${status_value}
+    # Pequena espera para o useQuery refetchar (cache stale + nova request)
+    Sleep    400ms
