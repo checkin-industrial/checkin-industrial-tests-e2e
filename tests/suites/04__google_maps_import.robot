@@ -92,9 +92,14 @@ Import Google Maps - aprovacao promove para Status Ativo
     [Documentation]    Empresa criada via import (Status=AguardandoRevisao) deve poder
     ...                ser aprovada via PUT com status=1 (Ativo). Apos aprovada, passa
     ...                a aparecer no filtro ?status=ativo (mapa publico).
+    ...
+    ...                Usa tipo=supermercado pra ter GooglePlaceId distinto dos testes
+    ...                anteriores (tipo=loja). Sem isso, o dedup do backend (re-import
+    ...                de empresas ja existentes vira "atualizado"/"ignorado", nao
+    ...                "criado") deixa o teste sem candidata fresca pra aprovar.
     [Tags]    google-maps    import    aprovacao    e2e
 
-    ${resultado}=    Importar Empresas Via Google Maps    cep=${CEP_BAURU}    tipo=loja
+    ${resultado}=    Importar Empresas Via Google Maps    cep=${CEP_BAURU}    tipo=supermercado
     ${id_pendente}=    Evaluate    next(i['empresaId'] for i in $resultado['itens'] if i['acao'] == 'criado')
 
     # Estado inicial: AguardandoRevisao
