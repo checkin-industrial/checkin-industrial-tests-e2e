@@ -26,8 +26,9 @@ Logar Como Admin
     ...                que foi solicitada (default: Gestao Empresas).
     [Arguments]    ${tab_label}=Empresas
     Click    text="Gestão"
-    # Submenu abre - clica no tab solicitado (que dispara LoginModal porque eh admin)
-    Click    role=menuitem and text="${tab_label}"
+    # Submenu abre - clica no tab solicitado (que dispara LoginModal porque eh admin).
+    # role[name=...] e a sintaxe Playwright para combinar role com accessible name.
+    Click    role=menuitem[name="${tab_label}"]
     # LoginModal: digita a key e submete
     Fill Text    css=input[type="password"]    ${API_KEY}
     Click    css=button[type="submit"]
