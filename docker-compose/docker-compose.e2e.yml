@@ -100,10 +100,12 @@ services:
       - "${WIREMOCK_PORT:-8089}:8080"
     healthcheck:
       # Imagem wiremock/wiremock e baseada em Alpine sem bash, entao o probe
-      # via /dev/tcp do bash nao funciona. WireMock 3 expoe /__admin/health
-      # que retorna {"status":"healthy"} - validamos via wget que vem com a
-      # imagem oficial. `--spider` faz HEAD-only sem baixar body.
-      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8080/__admin/health || exit 1"]
+      # via /dev/tcp do bash nao funciona. WireMock 3.x NAO tem /__admin/health
+      # (so a partir de 4.x) - usamos /__admin/mappings que existe desde sempre.
+      # IMPORTANTE: usa GET (-qO /dev/null), nao HEAD (--spider): WireMock
+      # responde 405 Method Not Allowed em HEAD pra esse endpoint, o que faria
+      # wget retornar exit != 0. wget vem do busybox da imagem oficial.
+      test: ["CMD-SHELL", "wget -qO /dev/null http://127.0.0.1:8080/__admin/mappings || exit 1"]
       interval: 5s
       timeout: 3s
       retries: 30
