@@ -1,15 +1,14 @@
 name: checkin-industrial-e2e
 
-# Stack E2E (postgres + api) configurada para teste:
+## Stack E2E (postgres + api + wiremock + painel) configurada para teste:
 # - Auth__ApiKey: chave fixa que keywords injetam no header X-Api-Key.
 # - OutputCache: TTL 0 elimina respostas cached que mascariam mutacoes assertadas.
 # - RateLimit: limites altos pra suite inteira nao bater 429 (60/min default eh
 #   muito baixo para teste).
 # - ASPNETCORE_ENVIRONMENT=Development mantem CORS aberto e nao requer config
 #   adicional de origens; o fail-fast do Program.cs so dispara em Production.
-#
-# Painel NAO entra aqui: testes E2E sao API-level. Para subir o painel use
-# o docker-compose.yml padrao.
+# - Painel: build local do checkin-industrial-painel servido por nginx em :8081.
+#   Usado pelas suites de UI E2E (05+) com Robot Framework Browser library.
 
 services:
   postgres:
@@ -110,6 +109,35 @@ services:
       timeout: 3s
       retries: 30
       start_period: 10s
+    networks:
+      - e2e-net
+
+  # Painel (nginx servindo o bundle React).
+  # VITE_API_BASE vazio + dev proxy NAO se aplica em build de prod (nginx).
+  # Em vez disso, o nginx.conf faz proxy de /api -> api:8080 e /uploads -> api:8080.
+  # Resultado: o painel se referencia a "/api" relativo e o nginx encaminha
+  # internamente na rede e2e-net. Browser library acessa painel em http://localhost:8081.
+  painel:
+    container_name: checkin-e2e-painel
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: painel.Dockerfile
+      # Local default: sibling do repo de tests. CI: override via env
+      # PAINEL_BUILD_CONTEXT (workspace path do checkout do painel).
+      additional_contexts:
+        painel: ${PAINEL_BUILD_CONTEXT:-../../checkin-industrial-painel}
+    ports:
+      - "${PAINEL_PORT:-8081}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO /dev/null http://127.0.0.1/ || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
     networks:
       - e2e-net
 

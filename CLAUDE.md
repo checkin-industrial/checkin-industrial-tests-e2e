@@ -18,13 +18,17 @@ Este repo faz parte de **4 sob `c:/git/checkin-industrial/`**:
 - **Nao eh .NET nem JS**: este eh um projeto Python. Nao tente buildar com `dotnet` ou `npm`.
 - **Depende do checkin-industrial-api como pasta irma**: o `docker-compose.e2e.yml` faz build
   do Dockerfile em `../../checkin-industrial-api`. CI checa out os dois repos como siblings.
-- **Sem painel**: a suite atual eh API-only (REST). UI E2E (Browser library) e PR futuro.
+- **Painel + UI E2E**: ate a suite 04, eram so API tests (REST). A partir da 05
+  (`05__ui_smoke.robot`), incluimos UI tests com Browser library / Playwright,
+  rodando contra o painel buildado pelo `docker-compose.e2e.yml` (nginx em :8081).
 
 ## Comandos
 
 ```bash
 # Setup
 pip install -r requirements.txt
+# rfbrowser baixa Chromium ~150MB local. Necessario uma unica vez.
+rfbrowser init chromium
 
 # Stack E2E (postgres + api)
 docker compose -f docker-compose/docker-compose.e2e.yml up -d --wait --build

@@ -6,14 +6,16 @@ WORKDIR /app
 
 # 'painel' é um additional_context apontando para a pasta do projeto Painel.
 COPY --from=painel package.json package-lock.json ./
-RUN npm ci
+# `npm install` (em vez de `ci`) tolera diferencas de plataforma no lock entre
+# Windows e Linux (binarios nativos: @emnapi, rolldown). Mesma estrategia do
+# CI do painel (.github/workflows/ci.yml).
+RUN npm install --no-audit --no-fund
 
 COPY --from=painel . .
 
-# Neutraliza a URL hardcoded em src/apiClient.ts:7. Com API_BASE = "" todas as
-# chamadas viram relativas (/api/..., /uploads/...) e o nginx faz proxy_pass.
-RUN sed -i 's|"https://appturismoindustrial-production.up.railway.app"|""|' src/apiClient.ts
-
+# VITE_API_BASE vazio (default em apiClient.ts) faz todas as chamadas virarem
+# relativas (/api/..., /uploads/...) e o nginx faz proxy_pass pra api:8080.
+ENV VITE_API_BASE=""
 RUN npm run build
 
 # ── Stage 2: Serve ───────────────────────────────────────────────────────────

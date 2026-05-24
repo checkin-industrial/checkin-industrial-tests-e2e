@@ -33,14 +33,36 @@ jobs:
       - name: Install Python dependencies
         run: pip install -r requirements.txt
 
-      - name: Start environment (Postgres + API)
+      - name: Install Playwright browsers (Browser library)
+        # rfbrowser init baixa Chromium + dependencias OS. Reusa o cache do
+        # Playwright em ~/.cache/ms-playwright se disponivel - actions/cache
+        # explicito daria ganho de 30s+/run mas e dispensavel agora.
+        run: rfbrowser init chromium
+
+      - name: Checkout painel repo (para build local do docker-compose)
+        # actions/checkout exige path RELATIVO a $GITHUB_WORKSPACE.
+        # Setamos PAINEL_BUILD_CONTEXT no proximo step pro docker-compose
+        # achar o checkout via additional_contexts (suporta env interpolation).
+        uses: actions/checkout@v4
+        with:
+          repository: checkin-industrial/checkin-industrial-painel
+          ref: ${{ vars.PAINEL_REF || 'main' }}
+          path: _painel
+
+      - name: Start environment (Postgres + API + WireMock + Painel)
         env:
           # Tag da API publicada no Docker Hub. Pode ser fixada via var de repo
           # (ex: API_IMAGE_TAG=sha-abc1234) para builds determinasticos.
           # Sem var configurada, cai para "latest".
           API_IMAGE_TAG: ${{ vars.API_IMAGE_TAG || 'latest' }}
+          # additional_contexts no compose le esta var (ver docker-compose.e2e.yml).
+          # Path relativo a docker-compose/ - ../_painel = $GITHUB_WORKSPACE/_painel.
+          PAINEL_BUILD_CONTEXT: ../_painel
         run: |
-          docker compose -f docker-compose/docker-compose.e2e.yml up -d --wait --wait-timeout 300 --pull always
+          # --build garante que o painel (build local) seja recompilado se
+          # houver mudancas em _painel/.
+          docker compose -f docker-compose/docker-compose.e2e.yml up -d --wait --wait-timeout 420 --pull always --build painel
+          docker compose -f docker-compose/docker-compose.e2e.yml up -d --wait --wait-timeout 300
 
       - name: Show containers status
         if: always()
