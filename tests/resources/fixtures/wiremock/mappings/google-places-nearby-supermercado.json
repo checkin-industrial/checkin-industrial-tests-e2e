@@ -1,0 +1,25 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/places:searchNearby",
+    "bodyPatterns": [
+      { "matchesJsonPath": "$.includedTypes[?(@ == 'supermarket')]" }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "places": [
+        {
+          "id": "ChIJE2E_super_001",
+          "displayName": { "text": "Supermercado E2E Alfa" },
+          "formattedAddress": "Av Bauru, 500 - Centro, Bauru - SP",
+          "location": { "latitude": -22.31480, "longitude": -49.06070 },
+          "types": ["supermarket"],
+          "nationalPhoneNumber": "(14) 3000-2001"
+        }
+      ]
+    }
+  }
+}
