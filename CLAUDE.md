@@ -167,6 +167,26 @@ Ordem sugerida, do mais simples ao mais complexo:
 A partir da suite 4 vale considerar **fixtures** (`tests/resources/fixtures/`) e talvez **WireMock**
 para mockar o Nominatim (parecido com o WireMock do MP no mecanica-hermes).
 
+## WireMock (Google Places)
+
+A partir da suite `04__google_maps_import.robot`, o compose inclui um service `wiremock` que
+simula a Google Places API. A API e configurada com `GoogleMaps__PlacesBaseUrl=http://wiremock:8080/v1/`
+no `docker-compose.e2e.yml`, entao **nunca toca a API real do Google** (que cobra por chamada).
+
+- Mappings: `tests/resources/fixtures/wiremock/mappings/*.json` (montados read-only no container).
+- Cada arquivo descreve um request matcher + response JSON.
+- Mappings disponiveis hoje:
+  - `google-places-nearby-loja.json` - retorna 2 lugares para `includedTypes=["store"]`.
+  - `google-places-nearby-farmacia-vazio.json` - retorna lista vazia para `includedTypes=["pharmacy"]`.
+- Sem matching = WireMock retorna 404 (util para testar caminhos de erro).
+- Porta publica: `8089` (configuravel via `WIREMOCK_PORT`).
+- Admin API do WireMock disponivel em `/__admin/` (reset de requests gravadas, contagem de chamadas, etc).
+  Ver keyword `Resetar WireMock` em `google_maps_api.resource`.
+
+Nominatim (geocodificacao de CEP) **continua sendo chamado real** pra simplificar (sem mock).
+A regiao permitida (`GoogleMaps__AllowedRegion__*`) e configurada com bounds amplos no compose
+pra aceitar qualquer CEP brasileiro.
+
 ## Anti-patterns que evitar
 
 - ❌ **Hardcoded IDs** entre testes. Sempre crie a entidade no setup do test e use o id retornado.

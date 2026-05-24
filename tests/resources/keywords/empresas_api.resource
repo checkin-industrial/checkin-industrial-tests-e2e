@@ -60,13 +60,15 @@ Deletar Empresa
     DELETE    ${API_URL}/api/empresas/${id}    headers=${headers}    expected_status=204
 
 Reativar Empresa
-    [Documentation]    Reativa uma empresa soft-deletada. Faz PUT do payload completo
-    ...                com `ativo: true` (a API exige todos os campos validos no PUT).
+    [Documentation]    Reativa ou aprova uma empresa via PUT do payload completo com
+    ...                `status: 1` (Ativo). Funciona pra Inativo->Ativo (reativacao)
+    ...                e AguardandoRevisao->Ativo (aprovacao pos-import).
     [Arguments]    ${id}
     ${empresa}=    Buscar Empresa    ${id}
     ${endereco}=   Set Variable    ${empresa.get('endereco', '') or empresa.get('Endereco', '')}
+    ${cnpj_atual}=   Set Variable    ${empresa.get('cnpj', '')}
     ${body}=    Create Dictionary
-    ...    cnpj=${empresa['cnpj']}
+    ...    cnpj=${cnpj_atual}
     ...    razaoSocial=${empresa['razaoSocial']}
     ...    nomeFantasia=${empresa['nomeFantasia']}
     ...    cnaePrincipal=${empresa['cnaePrincipal']}
@@ -82,6 +84,6 @@ Reativar Empresa
     ...    latitude=${{float($empresa['latitude'])}}
     ...    longitude=${{float($empresa['longitude'])}}
     ...    situacaoCadastral=${{int($empresa['situacaoCadastral'])}}
-    ...    ativo=${TRUE}
+    ...    status=${{int(1)}}
     ${headers}=    Headers Com Api Key
     PUT    ${API_URL}/api/empresas/${id}    json=${body}    headers=${headers}    expected_status=204

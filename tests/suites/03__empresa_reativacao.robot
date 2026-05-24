@@ -1,21 +1,27 @@
 *** Settings ***
-Documentation     Round-trip de soft delete + reativacao de Empresa. Valida o fluxo que
-...               o painel admin usa na nova feature "painel de reativacao":
-...                 1. Cria empresa (ativo=true por default)
-...                 2. Filtra com ?ativo=true: aparece
-...                 3. Filtra com ?ativo=false: NAO aparece
-...                 4. DELETE -> ativo=false
-...                 5. Filtra com ?ativo=true: NAO aparece
-...                 6. Filtra com ?ativo=false: aparece
-...                 7. Reativar via PUT com ativo=true
-...                 8. Filtra com ?ativo=true: aparece de novo
-...               Cobre tambem o efeito em GetEmpresaNeighbors: empresa Ativo=false nao
-...               deve aparecer como vizinha.
+Documentation     Round-trip de soft delete + reativacao de Empresa via Status enum.
+...               Valida o fluxo que o painel admin usa no botao "Reativar":
+...                 1. Cria empresa (Status=Ativo default)
+...                 2. Filtra ?status=ativo: aparece
+...                 3. Filtra ?status=inativo: NAO aparece
+...                 4. DELETE -> Status=Inativo
+...                 5. Filtra ?status=ativo: NAO aparece
+...                 6. Filtra ?status=inativo: aparece
+...                 7. Reativar via PUT com status=1 (Ativo)
+...                 8. Filtra ?status=ativo: aparece de novo
+...               Cobre tambem o efeito em GetEmpresaNeighbors: empresa Status=Inativo
+...               nao deve aparecer como vizinha.
 
 Resource    ../resources/keywords/common.resource
 Resource    ../resources/keywords/empresas_api.resource
 
 Suite Setup    Aguardar API Disponivel
+
+
+*** Variables ***
+${STATUS_ATIVO}                ${{int(1)}}
+${STATUS_INATIVO}              ${{int(2)}}
+${STATUS_AGUARDANDO_REVISAO}   ${{int(3)}}
 
 
 *** Test Cases ***
@@ -27,40 +33,40 @@ Empresa - soft delete + reativacao
     ${nome}=    Set Variable    Reativacao Test ${suffix}
     ${id}=    Criar Empresa    nome_fantasia=${nome}
 
-    # Recem criada esta ativa
+    # Recem criada esta com Status=Ativo (1)
     ${detalhe}=    Buscar Empresa    ${id}
-    Should Be Equal    ${detalhe['ativo']}    ${TRUE}
+    Should Be Equal As Integers    ${detalhe['status']}    ${STATUS_ATIVO}
 
-    # Aparece em ?ativo=true e nao em ?ativo=false
-    ${ativas}=    Filtrar Empresas    nomeFantasia=${nome}    ativo=true
+    # Aparece em ?status=ativo e nao em ?status=inativo
+    ${ativas}=    Filtrar Empresas    nomeFantasia=${nome}    status=ativo
     ${ids_ativas}=    Evaluate    [e['id'] for e in $ativas]
     Should Contain    ${ids_ativas}    ${id}
 
-    ${inativas}=    Filtrar Empresas    nomeFantasia=${nome}    ativo=false
+    ${inativas}=    Filtrar Empresas    nomeFantasia=${nome}    status=inativo
     ${ids_inativas}=    Evaluate    [e['id'] for e in $inativas]
     Should Not Contain    ${ids_inativas}    ${id}
 
-    # Soft delete: ativo=false
+    # Soft delete: Status=Inativo (2)
     Deletar Empresa    ${id}
     ${apos_delete}=    Buscar Empresa    ${id}
-    Should Be Equal    ${apos_delete['ativo']}    ${FALSE}
+    Should Be Equal As Integers    ${apos_delete['status']}    ${STATUS_INATIVO}
 
     # Inverte na filtragem
-    ${ativas_apos}=    Filtrar Empresas    nomeFantasia=${nome}    ativo=true
+    ${ativas_apos}=    Filtrar Empresas    nomeFantasia=${nome}    status=ativo
     ${ids_ativas_apos}=    Evaluate    [e['id'] for e in $ativas_apos]
     Should Not Contain    ${ids_ativas_apos}    ${id}
 
-    ${inativas_apos}=    Filtrar Empresas    nomeFantasia=${nome}    ativo=false
+    ${inativas_apos}=    Filtrar Empresas    nomeFantasia=${nome}    status=inativo
     ${ids_inativas_apos}=    Evaluate    [e['id'] for e in $inativas_apos]
     Should Contain    ${ids_inativas_apos}    ${id}
 
     # Reativacao via PUT - simula o botao "Reativar" do painel admin
     Reativar Empresa    ${id}
     ${reativada}=    Buscar Empresa    ${id}
-    Should Be Equal    ${reativada['ativo']}    ${TRUE}
+    Should Be Equal As Integers    ${reativada['status']}    ${STATUS_ATIVO}
 
     # Volta a aparecer no filtro de ativas
-    ${ativas_final}=    Filtrar Empresas    nomeFantasia=${nome}    ativo=true
+    ${ativas_final}=    Filtrar Empresas    nomeFantasia=${nome}    status=ativo
     ${ids_final}=    Evaluate    [e['id'] for e in $ativas_final]
     Should Contain    ${ids_final}    ${id}
 
@@ -71,7 +77,7 @@ Empresa - soft delete + reativacao
 Empresa inativa nao aparece como vizinha
     [Documentation]    Apos soft delete de uma empresa, ela nao deve mais ser retornada
     ...                como vizinha de outra empresa (EmpresaNeighborhoodService filtra
-    ...                Ativo != false).
+    ...                Status == Ativo).
     [Tags]    empresas    reativacao    vizinhanca    e2e
 
     ${suffix}=    Sufixo Aleatorio

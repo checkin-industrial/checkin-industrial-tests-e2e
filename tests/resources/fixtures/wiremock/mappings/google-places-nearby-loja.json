@@ -1,0 +1,33 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/places:searchNearby",
+    "bodyPatterns": [
+      { "matchesJsonPath": "$.includedTypes[?(@ == 'store')]" }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "places": [
+        {
+          "id": "ChIJE2E_loja_001",
+          "displayName": { "text": "Loja E2E Alfa" },
+          "formattedAddress": "Av Bauru, 100 - Centro, Bauru - SP",
+          "location": { "latitude": -22.31470, "longitude": -49.06060 },
+          "types": ["store"],
+          "nationalPhoneNumber": "(14) 3000-1001"
+        },
+        {
+          "id": "ChIJE2E_loja_002",
+          "displayName": { "text": "Loja E2E Beta" },
+          "formattedAddress": "Rua Bauru, 200 - Centro, Bauru - SP",
+          "location": { "latitude": -22.31500, "longitude": -49.06100 },
+          "types": ["store"],
+          "nationalPhoneNumber": "(14) 3000-1002"
+        }
+      ]
+    }
+  }
+}
