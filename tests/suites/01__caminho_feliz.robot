@@ -62,11 +62,12 @@ Empresas - Criar, filtrar e buscar vizinhos
     Should Contain    ${ids_vizinhos}    ${id_vizinha}
 
     # DELETE em Empresas eh soft delete (EmpresaService.RemoverAsync seta Status=Inativo).
-    # GET segue retornando 200 e status vira 2 (Inativo).
+    # GET segue retornando 200 e status vira "inativo" (string camelCase via
+    # JsonStringEnumConverter).
     Deletar Empresa    ${id_base}
     Deletar Empresa    ${id_vizinha}
     ${depois}=    Buscar Empresa    ${id_base}
-    Should Be Equal As Integers    ${depois['status']}    ${{int(2)}}
+    Should Be Equal As Strings    ${depois['status']}    inativo
 
 
 Pontos Institucionais - CRUD com filtro por tipo
