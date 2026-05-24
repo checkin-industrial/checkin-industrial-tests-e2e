@@ -1,16 +1,16 @@
 "DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
-"Cria duas empresas em coordenadas proximas e valida que a busca de vizinhos
-retorna a segunda como vizinha da primeira. Cobre filter + neighbors + delete.","327","Empresas - Criar, filtrar e buscar vizinhos","","Sun May 24 02:36:12 UTC 2026","passed","Sun May 24 02:36:13 UTC 2026","Caminho Feliz","Suites","",""
+"Ciclo completo de soft delete e reativacao de uma empresa via PUT.","139","Empresa - soft delete + reativacao","","Sun May 24 02:36:25 UTC 2026","passed","Sun May 24 02:36:26 UTC 2026","Empresa Reativacao","Suites","",""
+"GET /api/telefones-uteis sem nenhum header de auth deve retornar 200.","8","Read anonimo continua acessivel","","Sun May 24 02:36:25 UTC 2026","passed","Sun May 24 02:36:25 UTC 2026","Auth Api Key","Suites","",""
+"Cria → busca por id → lista → atualiza → confirma update → deleta → confirma deletado.","702","Telefones Uteis - CRUD completo","","Sun May 24 02:36:24 UTC 2026","passed","Sun May 24 02:36:25 UTC 2026","Caminho Feliz","Suites","",""
 "Apos soft delete de uma empresa, ela nao deve mais ser retornada
 como vizinha de outra empresa (EmpresaNeighborhoodService filtra
-Ativo != false).","80","Empresa inativa nao aparece como vizinha","","Sun May 24 02:36:13 UTC 2026","passed","Sun May 24 02:36:13 UTC 2026","Empresa Reativacao","Suites","",""
+Ativo != false).","81","Empresa inativa nao aparece como vizinha","","Sun May 24 02:36:26 UTC 2026","passed","Sun May 24 02:36:26 UTC 2026","Empresa Reativacao","Suites","",""
 "POST com header X-Api-Key contendo valor incorreto tambem deve ser 401.
-FixedTimeEquals no handler garante constant-time check; aqui so importa o status.","8","Write com X-Api-Key invalido retorna 401","","Sun May 24 02:36:13 UTC 2026","passed","Sun May 24 02:36:13 UTC 2026","Auth Api Key","Suites","",""
-"Cria dois pontos de tipos diferentes, lista filtrando por tipo, deleta.","131","Pontos Institucionais - CRUD com filtro por tipo","","Sun May 24 02:36:13 UTC 2026","passed","Sun May 24 02:36:13 UTC 2026","Caminho Feliz","Suites","",""
-"Cria → busca por id → lista → atualiza → confirma update → deleta → confirma deletado.","712","Telefones Uteis - CRUD completo","","Sun May 24 02:36:12 UTC 2026","passed","Sun May 24 02:36:12 UTC 2026","Caminho Feliz","Suites","",""
-"Ciclo completo de soft delete e reativacao de uma empresa via PUT.","149","Empresa - soft delete + reativacao","","Sun May 24 02:36:13 UTC 2026","passed","Sun May 24 02:36:13 UTC 2026","Empresa Reativacao","Suites","",""
+FixedTimeEquals no handler garante constant-time check; aqui so importa o status.","24","Write com X-Api-Key invalido retorna 401","","Sun May 24 02:36:25 UTC 2026","passed","Sun May 24 02:36:25 UTC 2026","Auth Api Key","Suites","",""
 "Confirma que com a chave correta o pipeline completa (201) e a entidade
-pode ser lida em seguida e removida.","30","Write com X-Api-Key valido segue normalmente","","Sun May 24 02:36:13 UTC 2026","passed","Sun May 24 02:36:13 UTC 2026","Auth Api Key","Suites","",""
-"GET /api/telefones-uteis sem nenhum header de auth deve retornar 200.","8","Read anonimo continua acessivel","","Sun May 24 02:36:13 UTC 2026","passed","Sun May 24 02:36:13 UTC 2026","Auth Api Key","Suites","",""
+pode ser lida em seguida e removida.","28","Write com X-Api-Key valido segue normalmente","","Sun May 24 02:36:25 UTC 2026","passed","Sun May 24 02:36:25 UTC 2026","Auth Api Key","Suites","",""
 "POST sem header X-Api-Key deve ser rejeitado pelo middleware
-de autenticacao antes mesmo de chegar no handler.","8","Write sem X-Api-Key retorna 401","","Sun May 24 02:36:13 UTC 2026","passed","Sun May 24 02:36:13 UTC 2026","Auth Api Key","Suites","",""
+de autenticacao antes mesmo de chegar no handler.","7","Write sem X-Api-Key retorna 401","","Sun May 24 02:36:25 UTC 2026","passed","Sun May 24 02:36:25 UTC 2026","Auth Api Key","Suites","",""
+"Cria dois pontos de tipos diferentes, lista filtrando por tipo, deleta.","126","Pontos Institucionais - CRUD com filtro por tipo","","Sun May 24 02:36:25 UTC 2026","passed","Sun May 24 02:36:25 UTC 2026","Caminho Feliz","Suites","",""
+"Cria duas empresas em coordenadas proximas e valida que a busca de vizinhos
+retorna a segunda como vizinha da primeira. Cobre filter + neighbors + delete.","323","Empresas - Criar, filtrar e buscar vizinhos","","Sun May 24 02:36:25 UTC 2026","passed","Sun May 24 02:36:25 UTC 2026","Caminho Feliz","Suites","",""
