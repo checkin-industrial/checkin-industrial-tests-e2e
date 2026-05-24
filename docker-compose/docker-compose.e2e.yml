@@ -99,11 +99,15 @@ services:
     ports:
       - "${WIREMOCK_PORT:-8089}:8080"
     healthcheck:
-      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080"]
+      # Imagem wiremock/wiremock e baseada em Alpine sem bash, entao o probe
+      # via /dev/tcp do bash nao funciona. WireMock 3 expoe /__admin/health
+      # que retorna {"status":"healthy"} - validamos via wget que vem com a
+      # imagem oficial. `--spider` faz HEAD-only sem baixar body.
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8080/__admin/health || exit 1"]
       interval: 5s
       timeout: 3s
-      retries: 20
-      start_period: 5s
+      retries: 30
+      start_period: 10s
     networks:
       - e2e-net
 
