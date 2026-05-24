@@ -61,8 +61,12 @@ Deletar Empresa
 
 Reativar Empresa
     [Documentation]    Reativa ou aprova uma empresa via PUT do payload completo com
-    ...                `status: 1` (Ativo). Funciona pra Inativo->Ativo (reativacao)
+    ...                `status="ativo"`. Funciona pra Inativo->Ativo (reativacao)
     ...                e AguardandoRevisao->Ativo (aprovacao pos-import).
+    ...
+    ...                Enums sao serializados pela API como string camelCase
+    ...                (JsonStringEnumConverter). Reaproveitamos os valores do GET
+    ...                direto no PUT - sem necessidade de int() casts.
     [Arguments]    ${id}
     ${empresa}=    Buscar Empresa    ${id}
     ${endereco}=   Set Variable    ${empresa.get('endereco', '') or empresa.get('Endereco', '')}
@@ -72,18 +76,18 @@ Reativar Empresa
     ...    razaoSocial=${empresa['razaoSocial']}
     ...    nomeFantasia=${empresa['nomeFantasia']}
     ...    cnaePrincipal=${empresa['cnaePrincipal']}
-    ...    setor=${{int($empresa['setor'])}}
-    ...    porte=${{int($empresa['porte'])}}
+    ...    setor=${empresa['setor']}
+    ...    porte=${empresa['porte']}
     ...    numeroFuncionarios=${{int($empresa['numeroFuncionarios'])}}
     ...    endereco=${endereco}
     ...    telefone=${empresa.get('telefone', '')}
     ...    cep=${empresa.get('cep', '')}
     ...    municipio=${empresa['municipio']}
     ...    descricaoCnae=${empresa['descricaoCnae']}
-    ...    matrizOuFilial=${{int($empresa['matrizOuFilialCodigo'])}}
+    ...    matrizOuFilial=${empresa['matrizOuFilialCodigo']}
     ...    latitude=${{float($empresa['latitude'])}}
     ...    longitude=${{float($empresa['longitude'])}}
-    ...    situacaoCadastral=${{int($empresa['situacaoCadastral'])}}
-    ...    status=${{int(1)}}
+    ...    situacaoCadastral=${empresa['situacaoCadastral']}
+    ...    status=ativo
     ${headers}=    Headers Com Api Key
     PUT    ${API_URL}/api/empresas/${id}    json=${body}    headers=${headers}    expected_status=204

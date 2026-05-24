@@ -19,9 +19,10 @@ Suite Setup    Aguardar API Disponivel
 
 
 *** Variables ***
-${STATUS_ATIVO}                ${{int(1)}}
-${STATUS_INATIVO}              ${{int(2)}}
-${STATUS_AGUARDANDO_REVISAO}   ${{int(3)}}
+# Enums serializados como string camelCase (JsonStringEnumConverter).
+${STATUS_ATIVO}                ativo
+${STATUS_INATIVO}              inativo
+${STATUS_AGUARDANDO_REVISAO}   aguardandoRevisao
 
 
 *** Test Cases ***
@@ -35,7 +36,7 @@ Empresa - soft delete + reativacao
 
     # Recem criada esta com Status=Ativo (1)
     ${detalhe}=    Buscar Empresa    ${id}
-    Should Be Equal As Integers    ${detalhe['status']}    ${STATUS_ATIVO}
+    Should Be Equal As Strings    ${detalhe['status']}    ${STATUS_ATIVO}
 
     # Aparece em ?status=ativo e nao em ?status=inativo
     ${ativas}=    Filtrar Empresas    nomeFantasia=${nome}    status=ativo
@@ -49,7 +50,7 @@ Empresa - soft delete + reativacao
     # Soft delete: Status=Inativo (2)
     Deletar Empresa    ${id}
     ${apos_delete}=    Buscar Empresa    ${id}
-    Should Be Equal As Integers    ${apos_delete['status']}    ${STATUS_INATIVO}
+    Should Be Equal As Strings    ${apos_delete['status']}    ${STATUS_INATIVO}
 
     # Inverte na filtragem
     ${ativas_apos}=    Filtrar Empresas    nomeFantasia=${nome}    status=ativo
@@ -63,7 +64,7 @@ Empresa - soft delete + reativacao
     # Reativacao via PUT - simula o botao "Reativar" do painel admin
     Reativar Empresa    ${id}
     ${reativada}=    Buscar Empresa    ${id}
-    Should Be Equal As Integers    ${reativada['status']}    ${STATUS_ATIVO}
+    Should Be Equal As Strings    ${reativada['status']}    ${STATUS_ATIVO}
 
     # Volta a aparecer no filtro de ativas
     ${ativas_final}=    Filtrar Empresas    nomeFantasia=${nome}    status=ativo

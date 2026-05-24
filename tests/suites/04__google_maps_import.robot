@@ -18,8 +18,9 @@ Test Setup     Resetar WireMock
 
 
 *** Variables ***
-${STATUS_AGUARDANDO_REVISAO}    ${{int(3)}}
-${STATUS_ATIVO}                 ${{int(1)}}
+# Enums serializados como string camelCase (JsonStringEnumConverter).
+${STATUS_AGUARDANDO_REVISAO}    aguardandoRevisao
+${STATUS_ATIVO}                 ativo
 # CEP de Bauru/SP - resolve via Nominatim (real, nao mockado) para
 # coordenadas dentro da AllowedRegion ampla configurada no compose.
 ${CEP_BAURU}                    17012000
@@ -44,7 +45,7 @@ Import Google Maps - cria empresas com Status AguardandoRevisao
     FOR    ${item}    IN    @{resultado['itens']}
         Continue For Loop If    '${item['acao']}' != 'criado'
         ${empresa}=    Buscar Empresa    ${item['empresaId']}
-        Should Be Equal As Integers    ${empresa['status']}    ${STATUS_AGUARDANDO_REVISAO}
+        Should Be Equal As Strings    ${empresa['status']}    ${STATUS_AGUARDANDO_REVISAO}
     END
 
     # Filtro do painel: aparecem em "aguardando revisao"
@@ -104,14 +105,14 @@ Import Google Maps - aprovacao promove para Status Ativo
 
     # Estado inicial: AguardandoRevisao
     ${antes}=    Buscar Empresa    ${id_pendente}
-    Should Be Equal As Integers    ${antes['status']}    ${STATUS_AGUARDANDO_REVISAO}
+    Should Be Equal As Strings    ${antes['status']}    ${STATUS_AGUARDANDO_REVISAO}
 
-    # Admin aprova (mesma keyword usada pra reativar; envia status=1)
+    # Admin aprova (mesma keyword usada pra reativar; envia status="ativo")
     Reativar Empresa    ${id_pendente}
 
     # Agora aparece no filtro publico (status=ativo)
     ${depois}=    Buscar Empresa    ${id_pendente}
-    Should Be Equal As Integers    ${depois['status']}    ${STATUS_ATIVO}
+    Should Be Equal As Strings    ${depois['status']}    ${STATUS_ATIVO}
 
     ${ativas}=    Filtrar Empresas    status=ativo
     ${ids_ativas}=    Evaluate    [e['id'] for e in $ativas]
