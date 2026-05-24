@@ -1,25 +1,6 @@
 "DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
-"Dispara import com tipo=loja (mapping retorna 2 lugares),
-valida que ambas foram criadas com Status=AguardandoRevisao,
-e que aparecem no filtro ?status=aguardando-revisao.","531","Import Google Maps - cria empresas com Status AguardandoRevisao","","Sun May 24 18:44:14 UTC 2026","passed","Sun May 24 18:44:15 UTC 2026","Google Maps Import","Suites","",""
-"Ciclo completo de soft delete e reativacao de uma empresa via PUT.","131","Empresa - soft delete + reativacao","","Sun May 24 18:44:14 UTC 2026","passed","Sun May 24 18:44:14 UTC 2026","Empresa Reativacao","Suites","",""
-"Click no toggle de filtros da legenda do mapa abre o
-painel lateral ""Filtros"" com input de busca e caixa
-""Empresas"".","539","Painel publico - filtros aparecem ao abrir painel de filtros","","Sun May 24 18:44:16 UTC 2026","passed","Sun May 24 18:44:17 UTC 2026","Ui Smoke","Suites","",""
-"Confirma que com a chave correta o pipeline completa (201) e a entidade
-pode ser lida em seguida e removida.","23","Write com X-Api-Key valido segue normalmente","","Sun May 24 18:44:14 UTC 2026","passed","Sun May 24 18:44:14 UTC 2026","Auth Api Key","Suites","",""
-"MaxRaioMetros=10000 no compose. Request com raio 15000 deve
-ser rejeitado antes mesmo de bater no WireMock.","21","Import Google Maps - raio acima do maximo retorna 400","","Sun May 24 18:44:15 UTC 2026","passed","Sun May 24 18:44:15 UTC 2026","Google Maps Import","Suites","",""
-"Tipo desconhecido (nao mapeado em GooglePlaceTypeMapping)
-deve retornar 400 com mensagem de ValidationException.","29","Import Google Maps - tipo nao suportado retorna 400","","Sun May 24 18:44:15 UTC 2026","passed","Sun May 24 18:44:15 UTC 2026","Google Maps Import","Suites","",""
-"Smoke basico: abre o painel anonimo, garante que o app
-React monta e o mapa esta visivel com o titulo do menu.","1233","Painel publico - mapa carrega com titulo correto","","Sun May 24 18:44:15 UTC 2026","passed","Sun May 24 18:44:16 UTC 2026","Ui Smoke","Suites","",""
 "POST sem header X-Api-Key deve ser rejeitado pelo middleware
-de autenticacao antes mesmo de chegar no handler.","6","Write sem X-Api-Key retorna 401","","Sun May 24 18:44:14 UTC 2026","passed","Sun May 24 18:44:14 UTC 2026","Auth Api Key","Suites","",""
-"Usuario anonimo tenta abrir ""Empresas"" no submenu de
-Gestao - LoginModal aparece. Apos preencher API_KEY do
-env, modal fecha e a tela de Gestao renderiza com o
-titulo ""Empresas Cadastradas"".","648","Login admin - chave correta destrava tela de Gestao Empresas","","Sun May 24 18:44:17 UTC 2026","passed","Sun May 24 18:44:18 UTC 2026","Ui Smoke","Suites","",""
+de autenticacao antes mesmo de chegar no handler.","8","Write sem X-Api-Key retorna 401","","Sun May 24 19:13:37 UTC 2026","passed","Sun May 24 19:13:37 UTC 2026","Auth Api Key","Suites","",""
 "Empresa criada via import (Status=AguardandoRevisao) deve poder
 ser aprovada via PUT com status=1 (Ativo). Apos aprovada, passa
 a aparecer no filtro ?status=ativo (mapa publico).
@@ -27,17 +8,59 @@ a aparecer no filtro ?status=ativo (mapa publico).
 Usa tipo=supermercado pra ter GooglePlaceId distinto dos testes
 anteriores (tipo=loja). Sem isso, o dedup do backend (re-import
 de empresas ja existentes vira ""atualizado""/""ignorado"", nao
-""criado"") deixa o teste sem candidata fresca pra aprovar.","81","Import Google Maps - aprovacao promove para Status Ativo","","Sun May 24 18:44:15 UTC 2026","passed","Sun May 24 18:44:15 UTC 2026","Google Maps Import","Suites","",""
-"POST com header X-Api-Key contendo valor incorreto tambem deve ser 401.
-FixedTimeEquals no handler garante constant-time check; aqui so importa o status.","6","Write com X-Api-Key invalido retorna 401","","Sun May 24 18:44:14 UTC 2026","passed","Sun May 24 18:44:14 UTC 2026","Auth Api Key","Suites","",""
-"Cria → busca por id → lista → atualiza → confirma update → deleta → confirma deletado.","659","Telefones Uteis - CRUD completo","","Sun May 24 18:44:13 UTC 2026","passed","Sun May 24 18:44:14 UTC 2026","Caminho Feliz","Suites","",""
+""criado"") deixa o teste sem candidata fresca pra aprovar.","91","Import Google Maps - aprovacao promove para Status Ativo","","Sun May 24 19:13:38 UTC 2026","passed","Sun May 24 19:13:38 UTC 2026","Google Maps Import","Suites","",""
+"Ciclo completo de soft delete e reativacao de uma empresa via PUT.","143","Empresa - soft delete + reativacao","","Sun May 24 19:13:38 UTC 2026","passed","Sun May 24 19:13:38 UTC 2026","Empresa Reativacao","Suites","",""
+"Cria empresa, soft-deleta via API, e valida via UI:
+filtro ""ativo"" NAO mostra a empresa; filtro ""inativo"" mostra.
+Cobre o caminho que o admin usa pra revisar empresas
+arquivadas e potencialmente reativar.","1123","Soft-delete via API esconde empresa do filtro ""ativo"" e mostra em ""inativo""","","Sun May 24 19:13:41 UTC 2026","passed","Sun May 24 19:13:42 UTC 2026","Ui Empresa Lista Admin","Suites","",""
+"Smoke basico: abre o painel anonimo, garante que o app
+React monta e o mapa esta visivel com o titulo do menu.","999","Painel publico - mapa carrega com titulo correto","","Sun May 24 19:13:39 UTC 2026","passed","Sun May 24 19:13:40 UTC 2026","Ui Smoke","Suites","",""
+"GET /api/telefones-uteis sem nenhum header de auth deve retornar 200.","8","Read anonimo continua acessivel","","Sun May 24 19:13:37 UTC 2026","passed","Sun May 24 19:13:37 UTC 2026","Auth Api Key","Suites","",""
+"Cria → busca por id → lista → atualiza → confirma update → deleta → confirma deletado.","662","Telefones Uteis - CRUD completo","","Sun May 24 19:13:36 UTC 2026","passed","Sun May 24 19:13:37 UTC 2026","Caminho Feliz","Suites","",""
 "Cria duas empresas em coordenadas proximas e valida que a busca de vizinhos
-retorna a segunda como vizinha da primeira. Cobre filter + neighbors + delete.","321","Empresas - Criar, filtrar e buscar vizinhos","","Sun May 24 18:44:14 UTC 2026","passed","Sun May 24 18:44:14 UTC 2026","Caminho Feliz","Suites","",""
-"GET /api/telefones-uteis sem nenhum header de auth deve retornar 200.","7","Read anonimo continua acessivel","","Sun May 24 18:44:14 UTC 2026","passed","Sun May 24 18:44:14 UTC 2026","Auth Api Key","Suites","",""
-"Dois imports consecutivos com o mesmo mapping nao devem criar
-duplicatas. O segundo enriquece campos vazios ou ignora se ja
-tudo preenchido. Empresas continuam com Status=AguardandoRevisao.","63","Import Google Maps - dedup por GooglePlaceId em segundo import","","Sun May 24 18:44:15 UTC 2026","passed","Sun May 24 18:44:15 UTC 2026","Google Maps Import","Suites","",""
+retorna a segunda como vizinha da primeira. Cobre filter + neighbors + delete.","328","Empresas - Criar, filtrar e buscar vizinhos","","Sun May 24 19:13:37 UTC 2026","passed","Sun May 24 19:13:37 UTC 2026","Caminho Feliz","Suites","",""
 "Apos soft delete de uma empresa, ela nao deve mais ser retornada
 como vizinha de outra empresa (EmpresaNeighborhoodService filtra
-Status == Ativo).","72","Empresa inativa nao aparece como vizinha","","Sun May 24 18:44:14 UTC 2026","passed","Sun May 24 18:44:14 UTC 2026","Empresa Reativacao","Suites","",""
-"Cria dois pontos de tipos diferentes, lista filtrando por tipo, deleta.","118","Pontos Institucionais - CRUD com filtro por tipo","","Sun May 24 18:44:14 UTC 2026","passed","Sun May 24 18:44:14 UTC 2026","Caminho Feliz","Suites","",""
+Status == Ativo).","73","Empresa inativa nao aparece como vizinha","","Sun May 24 19:13:38 UTC 2026","passed","Sun May 24 19:13:38 UTC 2026","Empresa Reativacao","Suites","",""
+"Login admin -> tela Importar do Google Maps -> preenche
+CEP + raio + tipo ""farmacia"" -> submit -> deve mostrar
+contador ""Encontrados: 0"" porque o mapping da farmacia
+devolve vazio (sem efeito colateral no banco).","677","Form de import dispara busca e mostra resultados","","Sun May 24 19:13:42 UTC 2026","passed","Sun May 24 19:13:43 UTC 2026","Ui Google Maps Import","Suites","",""
+"POST com header X-Api-Key contendo valor incorreto tambem deve ser 401.
+FixedTimeEquals no handler garante constant-time check; aqui so importa o status.","8","Write com X-Api-Key invalido retorna 401","","Sun May 24 19:13:37 UTC 2026","passed","Sun May 24 19:13:37 UTC 2026","Auth Api Key","Suites","",""
+"Confirma que com a chave correta o pipeline completa (201) e a entidade
+pode ser lida em seguida e removida.","27","Write com X-Api-Key valido segue normalmente","","Sun May 24 19:13:37 UTC 2026","passed","Sun May 24 19:13:37 UTC 2026","Auth Api Key","Suites","",""
+"Login admin -> importar tipo ""banco"" -> WireMock devolve
+1 lugar com PlaceId proprio pra UI (nao colide com suite
+04 que usa tipo=loja+supermercado) -> empresa criada com
+Status=AguardandoRevisao -> clica em ""Ir para revisar""
+-> redireciona pra Gestao Empresas -> filtra
+aguardando-revisao -> verifica que aparece.
+
+Tipo ""banco"" exclusivo pra essa suite porque outros tipos
+ja tem PlaceIds gravados no banco por runs anteriores
+(soft delete preserva GooglePlaceId, dedup nao cria
+novas). Sem PlaceId fresco, result.criados=0 e o botao
+""Ir para revisar"" nao renderiza.","1168","Import com criados aparece em ""Aguardando revisao"" na Gestao Empresas","","Sun May 24 19:13:43 UTC 2026","passed","Sun May 24 19:13:44 UTC 2026","Ui Google Maps Import","Suites","",""
+"Click no toggle de filtros da legenda do mapa abre o
+painel lateral ""Filtros"" com input de busca e caixa
+""Empresas"".","453","Painel publico - filtros aparecem ao abrir painel de filtros","","Sun May 24 19:13:40 UTC 2026","passed","Sun May 24 19:13:40 UTC 2026","Ui Smoke","Suites","",""
+"Cria dois pontos de tipos diferentes, lista filtrando por tipo, deleta.","123","Pontos Institucionais - CRUD com filtro por tipo","","Sun May 24 19:13:37 UTC 2026","passed","Sun May 24 19:13:37 UTC 2026","Caminho Feliz","Suites","",""
+"Cria empresa via API REST, abre tela Gestao Empresas
+logado como admin, e confirma que o nome fantasia
+aparece na tabela. Cleanup ao final.","607","Empresa criada via API aparece na lista admin","","Sun May 24 19:13:41 UTC 2026","passed","Sun May 24 19:13:41 UTC 2026","Ui Empresa Lista Admin","Suites","",""
+"MaxRaioMetros=10000 no compose. Request com raio 15000 deve
+ser rejeitado antes mesmo de bater no WireMock.","21","Import Google Maps - raio acima do maximo retorna 400","","Sun May 24 19:13:38 UTC 2026","passed","Sun May 24 19:13:39 UTC 2026","Google Maps Import","Suites","",""
+"Tipo desconhecido (nao mapeado em GooglePlaceTypeMapping)
+deve retornar 400 com mensagem de ValidationException.","31","Import Google Maps - tipo nao suportado retorna 400","","Sun May 24 19:13:38 UTC 2026","passed","Sun May 24 19:13:38 UTC 2026","Google Maps Import","Suites","",""
+"Dois imports consecutivos com o mesmo mapping nao devem criar
+duplicatas. O segundo enriquece campos vazios ou ignora se ja
+tudo preenchido. Empresas continuam com Status=AguardandoRevisao.","68","Import Google Maps - dedup por GooglePlaceId em segundo import","","Sun May 24 19:13:38 UTC 2026","passed","Sun May 24 19:13:38 UTC 2026","Google Maps Import","Suites","",""
+"Usuario anonimo tenta abrir ""Empresas"" no submenu de
+Gestao - LoginModal aparece. Apos preencher API_KEY do
+env, modal fecha e a tela de Gestao renderiza com o
+titulo ""Empresas Cadastradas"".","624","Login admin - chave correta destrava tela de Gestao Empresas","","Sun May 24 19:13:40 UTC 2026","passed","Sun May 24 19:13:41 UTC 2026","Ui Smoke","Suites","",""
+"Dispara import com tipo=loja (mapping retorna 2 lugares),
+valida que ambas foram criadas com Status=AguardandoRevisao,
+e que aparecem no filtro ?status=aguardando-revisao.","532","Import Google Maps - cria empresas com Status AguardandoRevisao","","Sun May 24 19:13:38 UTC 2026","passed","Sun May 24 19:13:38 UTC 2026","Google Maps Import","Suites","",""
