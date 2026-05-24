@@ -41,7 +41,7 @@ Form de import dispara busca e mostra resultados
     # Tipo: farmacia (WireMock retorna array vazio - sem criar nada no banco)
     Select Options By    css=select    value    farmacia
     # Submit
-    Click    role=button[name="Importar"]
+    Click    css=button[type="submit"]
 
     # Resultado renderiza com header "Resultado da importação".
     # Conteudo exato (counts) e validado pela suite 04 via API - aqui so
@@ -63,12 +63,12 @@ Import com criados aparece em "Aguardando revisao" na Gestao Empresas
 
     Fill Text    css=input[placeholder="17012000"]    ${CEP_BAURU}
     Select Options By    css=select    value    loja
-    Click    role=button[name="Importar"]
+    Click    css=button[type="submit"]
 
     Wait For Elements State    text="Resultado da importação"    visible    timeout=15s
     # "Ir para revisar" so aparece se result.criados > 0
-    Wait For Elements State    text=/Ir para revisar/    visible    timeout=5s
-    Click    text=/Ir para revisar/
+    Wait For Elements State    text="Ir para revisar empresas aguardando aprovação"    visible    timeout=5s
+    Click    text="Ir para revisar empresas aguardando aprovação"
 
     # Aterrissa em Gestao Empresas
     Wait For Elements State    text="Empresas Cadastradas"    visible    timeout=15s
