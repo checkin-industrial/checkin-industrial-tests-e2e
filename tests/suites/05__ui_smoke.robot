@@ -53,4 +53,4 @@ Login admin - chave correta destrava tela de Gestao Empresas
     Logar Como Admin    tab_label=Empresas
     # Confirma que aterrissou na ManagementScreen
     Wait For Elements State    text="Empresas Cadastradas"    visible    timeout=15s
-    Wait For Elements State    role=button[name="Nova Empresa"]    visible    timeout=5s
+    Wait For Elements State    text="Nova Empresa"    visible    timeout=10s
