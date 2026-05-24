@@ -49,20 +49,26 @@ jobs:
           ref: ${{ vars.PAINEL_REF || 'main' }}
           path: _painel
 
+      - name: Build painel image (local)
+        env:
+          # additional_contexts no compose le esta var (ver docker-compose.e2e.yml).
+          # Path relativo a docker-compose/ - ../_painel = $GITHUB_WORKSPACE/_painel.
+          PAINEL_BUILD_CONTEXT: ../_painel
+        run: |
+          # `compose build painel` builda APENAS o painel (api e wiremock vem do
+          # Docker Hub via `image:`). Se usassemos `up --build`, compose tentaria
+          # resolver tambem o `build:` fallback da api (path local nao existe no CI).
+          docker compose -f docker-compose/docker-compose.e2e.yml build painel
+
       - name: Start environment (Postgres + API + WireMock + Painel)
         env:
           # Tag da API publicada no Docker Hub. Pode ser fixada via var de repo
           # (ex: API_IMAGE_TAG=sha-abc1234) para builds determinasticos.
           # Sem var configurada, cai para "latest".
           API_IMAGE_TAG: ${{ vars.API_IMAGE_TAG || 'latest' }}
-          # additional_contexts no compose le esta var (ver docker-compose.e2e.yml).
-          # Path relativo a docker-compose/ - ../_painel = $GITHUB_WORKSPACE/_painel.
           PAINEL_BUILD_CONTEXT: ../_painel
         run: |
-          # --build garante que o painel (build local) seja recompilado se
-          # houver mudancas em _painel/.
-          docker compose -f docker-compose/docker-compose.e2e.yml up -d --wait --wait-timeout 420 --pull always --build painel
-          docker compose -f docker-compose/docker-compose.e2e.yml up -d --wait --wait-timeout 300
+          docker compose -f docker-compose/docker-compose.e2e.yml up -d --wait --wait-timeout 420 --pull always
 
       - name: Show containers status
         if: always()
