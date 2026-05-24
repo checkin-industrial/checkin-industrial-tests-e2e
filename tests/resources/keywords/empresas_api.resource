@@ -67,12 +67,20 @@ Reativar Empresa
     ...                Enums sao serializados pela API como string camelCase
     ...                (JsonStringEnumConverter). Reaproveitamos os valores do GET
     ...                direto no PUT - sem necessidade de int() casts.
+    ...
+    ...                Empresas importadas do Google Maps vem sem CNPJ (Cnpj nullable
+    ...                na entidade) - o FluentValidation rejeita PUT sem CNPJ valido,
+    ...                entao geramos um CNPJ valido aqui pra simular o step do admin
+    ...                preencher antes de aprovar.
     [Arguments]    ${id}
     ${empresa}=    Buscar Empresa    ${id}
     ${endereco}=   Set Variable    ${empresa.get('endereco', '') or empresa.get('Endereco', '')}
-    ${cnpj_atual}=   Set Variable    ${empresa.get('cnpj', '')}
+    ${cnpj_atual}=   Set Variable    ${empresa.get('cnpj', '') or ''}
+    ${cnpj_final}=    Run Keyword If    '${cnpj_atual}' == '${EMPTY}' or '${cnpj_atual}' == 'None'
+    ...    Gerar CNPJ Valido
+    ...    ELSE    Set Variable    ${cnpj_atual}
     ${body}=    Create Dictionary
-    ...    cnpj=${cnpj_atual}
+    ...    cnpj=${cnpj_final}
     ...    razaoSocial=${empresa['razaoSocial']}
     ...    nomeFantasia=${empresa['nomeFantasia']}
     ...    cnaePrincipal=${empresa['cnaePrincipal']}

@@ -108,12 +108,14 @@ Reativar empresa inativa via UI: volta ao estado ativo
     Logar Como Admin    tab_label=Empresas
     Wait For Elements State    text="Empresas Cadastradas"    visible    timeout=15s
 
-    # Filtra inativos
+    # Filtra inativos. Aguarda pelo BOTAO Reativar direto (e nao so pelo nome
+    # da empresa): a action_group da row pode renderizar depois do <strong>,
+    # entao esperar so pelo nome pode disparar o click antes do botao existir.
     Aplicar Filtro Status Admin    inativo
-    Wait For Elements State    text=${nome}    visible    timeout=10s
+    ${reativar_btn}=    Set Variable    xpath=//tr[td//strong[normalize-space()="${nome}"]]//button[normalize-space()="Reativar"]
+    Wait For Elements State    ${reativar_btn}    visible    timeout=10s
 
-    # Click em Reativar
-    Click    xpath=//tr[td//strong[normalize-space()="${nome}"]]//button[normalize-space()="Reativar"]
+    Click    ${reativar_btn}
 
     # Sumiu do filtro inativo
     Wait For Elements State    text=${nome}    hidden    timeout=10s
