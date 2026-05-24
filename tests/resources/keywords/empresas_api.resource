@@ -58,3 +58,30 @@ Deletar Empresa
     [Arguments]    ${id}
     ${headers}=    Headers Com Api Key
     DELETE    ${API_URL}/api/empresas/${id}    headers=${headers}    expected_status=204
+
+Reativar Empresa
+    [Documentation]    Reativa uma empresa soft-deletada. Faz PUT do payload completo
+    ...                com `ativo: true` (a API exige todos os campos validos no PUT).
+    [Arguments]    ${id}
+    ${empresa}=    Buscar Empresa    ${id}
+    ${endereco}=   Set Variable    ${empresa.get('endereco', '') or empresa.get('Endereco', '')}
+    ${body}=    Create Dictionary
+    ...    cnpj=${empresa['cnpj']}
+    ...    razaoSocial=${empresa['razaoSocial']}
+    ...    nomeFantasia=${empresa['nomeFantasia']}
+    ...    cnaePrincipal=${empresa['cnaePrincipal']}
+    ...    setor=${{int($empresa['setor'])}}
+    ...    porte=${{int($empresa['porte'])}}
+    ...    numeroFuncionarios=${{int($empresa['numeroFuncionarios'])}}
+    ...    endereco=${endereco}
+    ...    telefone=${empresa.get('telefone', '')}
+    ...    cep=${empresa.get('cep', '')}
+    ...    municipio=${empresa['municipio']}
+    ...    descricaoCnae=${empresa['descricaoCnae']}
+    ...    matrizOuFilial=${{int($empresa['matrizOuFilialCodigo'])}}
+    ...    latitude=${{float($empresa['latitude'])}}
+    ...    longitude=${{float($empresa['longitude'])}}
+    ...    situacaoCadastral=${{int($empresa['situacaoCadastral'])}}
+    ...    ativo=${TRUE}
+    ${headers}=    Headers Com Api Key
+    PUT    ${API_URL}/api/empresas/${id}    json=${body}    headers=${headers}    expected_status=204
