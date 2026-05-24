@@ -1,0 +1,14 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/places:searchNearby",
+    "bodyPatterns": [
+      { "matchesJsonPath": "$.includedTypes[?(@ == 'pharmacy')]" }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": { "places": [] }
+  }
+}

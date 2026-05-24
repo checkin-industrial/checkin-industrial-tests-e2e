@@ -53,12 +53,25 @@ services:
       RateLimit__AnonymousPermitPerMinute: "10000"
       RateLimit__AuthenticatedPermitPerMinute: "10000"
       UPLOADS_ROOT: /uploads
+      # GoogleMaps: redireciona o cliente do Google Places pro WireMock que
+      # responde fixtures pre-cadastradas (E2E nao toca a API real, que cobra).
+      # AllowedRegion bem ampla pra aceitar qualquer CEP brasileiro nos testes;
+      # MaxRaioMetros 10km cobre cenarios da suite. Em prod, defaults sao 1km.
+      GoogleMaps__ApiKey: "wiremock-key-not-validated"
+      GoogleMaps__PlacesBaseUrl: "http://wiremock:8080/v1/"
+      GoogleMaps__MaxRaioMetros: "10000"
+      GoogleMaps__AllowedRegion__LatMin: "-35"
+      GoogleMaps__AllowedRegion__LatMax: "5"
+      GoogleMaps__AllowedRegion__LngMin: "-74"
+      GoogleMaps__AllowedRegion__LngMax: "-34"
     volumes:
       - api_e2e_uploads:/uploads
     ports:
       - "${API_PORT:-8080}:8080"
     depends_on:
       postgres:
+        condition: service_healthy
+      wiremock:
         condition: service_healthy
     healthcheck:
       # TCP probe via bash exec — funciona em qualquer aspnet:10.0 sem precisar
@@ -69,6 +82,28 @@ services:
       timeout: 3s
       retries: 30
       start_period: 20s
+    networks:
+      - e2e-net
+
+  wiremock:
+    # WireMock standalone responde como Google Places v1 nos testes E2E.
+    # Mappings vivem em ../tests/resources/fixtures/wiremock/ e sao montados
+    # read-only no container. Sem mappings = retorna 404 padrao (que e o
+    # comportamento desejado pra testes negativos).
+    image: wiremock/wiremock:3.10.0
+    container_name: checkin-e2e-wiremock
+    restart: unless-stopped
+    command: ["--global-response-templating", "--verbose"]
+    volumes:
+      - ../tests/resources/fixtures/wiremock:/home/wiremock:ro
+    ports:
+      - "${WIREMOCK_PORT:-8089}:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
     networks:
       - e2e-net
 
