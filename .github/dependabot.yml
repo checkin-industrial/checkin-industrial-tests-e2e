@@ -1,0 +1,35 @@
+# Dependabot config - atualizacoes automaticas de pip + GitHub Actions.
+# Padrao alinhado com checkin-industrial-api e checkin-industrial-painel:
+# - ecossistema de codigo (pip aqui) = weekly na segunda
+# - github-actions = monthly
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # Dependencias Python da suite Robot (requirements.txt na raiz).
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "pip"
+    groups:
+      robotframework:
+        patterns:
+          - "robotframework"
+          - "robotframework-*"
+      reporting:
+        patterns:
+          - "allure-*"
+
+  # Actions usadas nos workflows.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    labels:
+      - "dependencies"
+      - "github-actions"
