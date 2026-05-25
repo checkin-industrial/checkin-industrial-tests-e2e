@@ -40,6 +40,12 @@ services:
       ConnectionStrings__DefaultConnectionTurismo: "Server=postgres;Port=5432;Database=${POSTGRES_DB:-turismoindustrial};User Id=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres};"
       # Habilita servir /uploads a partir do volume montado abaixo (Program.cs:81)
       UPLOADS_ROOT: /uploads
+      # GoogleMaps: lido de docker-compose/.env (nao commitado).
+      # Sem ApiKey, endpoints de import retornam erro 500 ao chamar Places API.
+      # Default vazio permite subir a stack mesmo sem chave (testes que nao tocam
+      # Google Maps continuam funcionando). Para a region/raio defaults usar
+      # os de appsettings.json (Bauru/SP) ou override aqui.
+      GoogleMaps__ApiKey: ${GOOGLE_MAPS_API_KEY:-}
     volumes:
       - api_uploads:/uploads
     ports:
