@@ -89,7 +89,7 @@ Excluir empresa via UI: soft-delete confirmado por API
 
     # Backend confirma soft-delete: status virou "inativo"
     ${detalhe}=    Buscar Empresa    ${id}
-    Should Be Equal As Strings    ${detalhe['status']}    inativo
+    Should Be Equal As Strings    ${detalhe['status']}    ${STATUS_INATIVO}
 
 
 Reativar empresa inativa via UI: volta ao estado ativo
@@ -116,7 +116,7 @@ Reativar empresa inativa via UI: volta ao estado ativo
     #      action_group renderizou).
     # Cada wait independente da uma janela de 15s, total margem >> tempo de
     # qualquer round-trip realistico do CI.
-    Aplicar Filtro Status Admin    inativo
+    Aplicar Filtro Status Admin    ${FILTRO_STATUS_INATIVO}
     Wait For Elements State    xpath=//strong[normalize-space()="${nome}"]    visible    timeout=${UI_DEFAULT_TIMEOUT}
     ${reativar_btn}=    Set Variable    xpath=//tr[td//strong[normalize-space()="${nome}"]]//button[normalize-space()="Reativar"]
     Wait For Elements State    ${reativar_btn}    visible    timeout=${UI_DEFAULT_TIMEOUT}
@@ -130,12 +130,12 @@ Reativar empresa inativa via UI: volta ao estado ativo
     Wait For Elements State    xpath=//strong[normalize-space()="${nome}"]    hidden    timeout=${UI_SHORT_TIMEOUT}
 
     # Aparece no filtro ativo
-    Aplicar Filtro Status Admin    ativo
+    Aplicar Filtro Status Admin    ${FILTRO_STATUS_ATIVO}
     Wait For Elements State    xpath=//strong[normalize-space()="${nome}"]    visible    timeout=${UI_SHORT_TIMEOUT}
 
     # API confirma status ativo
     ${detalhe}=    Buscar Empresa    ${id}
-    Should Be Equal As Strings    ${detalhe['status']}    ativo
+    Should Be Equal As Strings    ${detalhe['status']}    ${STATUS_ATIVO}
 
     # Cleanup
     Deletar Empresa    ${id}

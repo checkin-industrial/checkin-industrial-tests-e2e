@@ -18,11 +18,9 @@ Test Setup     Resetar WireMock
 
 
 *** Variables ***
-# Enums serializados como string camelCase (JsonStringEnumConverter).
-${STATUS_AGUARDANDO_REVISAO}    aguardandoRevisao
-${STATUS_ATIVO}                 ativo
 # CEP de Bauru/SP - resolve via Nominatim (real, nao mockado) para
 # coordenadas dentro da AllowedRegion ampla configurada no compose.
+# Constantes de StatusEmpresa vem de common.resource.
 ${CEP_BAURU}                    17012000
 
 
@@ -49,11 +47,11 @@ Import Google Maps - cria empresas com Status AguardandoRevisao
     END
 
     # Filtro do painel: aparecem em "aguardando revisao"
-    ${pendentes}=    Filtrar Empresas    status=aguardando-revisao
+    ${pendentes}=    Filtrar Empresas    status=${FILTRO_STATUS_AGUARDANDO_REVISAO}
     Should Be True    len($pendentes) >= ${1}
 
     # NAO aparecem no mapa publico (filtra status=ativo)
-    ${ativas}=    Filtrar Empresas    status=ativo
+    ${ativas}=    Filtrar Empresas    status=${FILTRO_STATUS_ATIVO}
     ${ids_pendentes}=    Evaluate    [i['empresaId'] for i in $resultado['itens'] if i['acao'] == 'criado']
     ${ids_ativas}=    Evaluate    [e['id'] for e in $ativas]
     FOR    ${id}    IN    @{ids_pendentes}
@@ -114,7 +112,7 @@ Import Google Maps - aprovacao promove para Status Ativo
     ${depois}=    Buscar Empresa    ${id_pendente}
     Should Be Equal As Strings    ${depois['status']}    ${STATUS_ATIVO}
 
-    ${ativas}=    Filtrar Empresas    status=ativo
+    ${ativas}=    Filtrar Empresas    status=${FILTRO_STATUS_ATIVO}
     ${ids_ativas}=    Evaluate    [e['id'] for e in $ativas]
     Should Contain    ${ids_ativas}    ${id_pendente}
 

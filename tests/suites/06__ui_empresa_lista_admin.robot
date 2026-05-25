@@ -59,5 +59,5 @@ Soft-delete via API esconde empresa do filtro "ativo" e mostra em "inativo"
     Wait For Elements State    text=${nome}    hidden    timeout=${UI_SHORT_TIMEOUT}
 
     # Troca pra filtro "inativo" - deve aparecer
-    Aplicar Filtro Status Admin    inativo
+    Aplicar Filtro Status Admin    ${FILTRO_STATUS_INATIVO}
     Wait For Elements State    text=${nome}    visible    timeout=${UI_SHORT_TIMEOUT}

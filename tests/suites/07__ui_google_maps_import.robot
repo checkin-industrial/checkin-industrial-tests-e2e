@@ -80,12 +80,12 @@ Import com criados aparece em "Aguardando revisao" na Gestao Empresas
     # Aterrissa em Gestao Empresas
     Wait For Elements State    text="Empresas Cadastradas"    visible    timeout=${UI_DEFAULT_TIMEOUT}
     # Aplica filtro pra ver so AguardandoRevisao
-    Aplicar Filtro Status Admin    aguardando-revisao
+    Aplicar Filtro Status Admin    ${FILTRO_STATUS_AGUARDANDO_REVISAO}
     # Mapping retorna "Banco UI Test Alfa"
     Wait For Elements State    text="Banco UI Test Alfa"    visible    timeout=${UI_SHORT_TIMEOUT}
 
     # Cleanup: pega ids das empresas criadas nesse mapping e deleta
-    ${ativas}=    Filtrar Empresas    nomeFantasia=Banco UI Test    status=aguardando-revisao
+    ${ativas}=    Filtrar Empresas    nomeFantasia=Banco UI Test    status=${FILTRO_STATUS_AGUARDANDO_REVISAO}
     FOR    ${empresa}    IN    @{ativas}
         Deletar Empresa    ${empresa['id']}
     END

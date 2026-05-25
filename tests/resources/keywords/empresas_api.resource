@@ -96,6 +96,6 @@ Reativar Empresa
     ...    latitude=${{float($empresa['latitude'])}}
     ...    longitude=${{float($empresa['longitude'])}}
     ...    situacaoCadastral=${empresa['situacaoCadastral']}
-    ...    status=ativo
+    ...    status=${STATUS_ATIVO}
     ${headers}=    Headers Com Api Key
     PUT    ${API_URL}/api/empresas/${id}    json=${body}    headers=${headers}    expected_status=204

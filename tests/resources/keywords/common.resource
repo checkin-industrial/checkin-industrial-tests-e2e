@@ -7,6 +7,45 @@ Library     OperatingSystem
 Variables   ../variables/env.yaml
 
 
+*** Variables ***
+# Enums serializados pela API como string camelCase
+# (JsonStringEnumConverter). Use estas constantes em assertions sobre o
+# campo da resposta JSON (ex: empresa['status'] == ${STATUS_ATIVO}) e
+# em payloads de POST/PUT.
+#
+# StatusEmpresa
+${STATUS_ATIVO}                  ativo
+${STATUS_INATIVO}                inativo
+${STATUS_AGUARDANDO_REVISAO}     aguardandoRevisao
+# SetorEmpresa
+${SETOR_INDUSTRIA}               industria
+${SETOR_COMERCIO}                comercio
+${SETOR_SERVICOS}                servicos
+# PorteEmpresa
+${PORTE_ME}                      me
+${PORTE_EPP}                     epp
+${PORTE_MEDIA}                   media
+${PORTE_GRANDE}                  grande
+# MatrizOuFilial
+${MATRIZ_OU_FILIAL_MATRIZ}       matriz
+${MATRIZ_OU_FILIAL_FILIAL}       filial
+# SituacaoCadastral
+${SITUACAO_ATIVA}                ativa
+${SITUACAO_SUSPENSA}             suspensa
+${SITUACAO_INAPTA}               inapta
+${SITUACAO_BAIXADA}              baixada
+${SITUACAO_NULA}                 nula
+
+# Filtros do endpoint GET /api/empresas/filter?status= e do <select>
+# de status no painel admin: kebab-case (NAO bate 1:1 com o nome do
+# enum em camelCase). Use estas variaveis em call sites de
+# "Filtrar Empresas    status=..." e em "Aplicar Filtro Status Admin".
+${FILTRO_STATUS_ATIVO}                  ativo
+${FILTRO_STATUS_INATIVO}                inativo
+${FILTRO_STATUS_AGUARDANDO_REVISAO}     aguardando-revisao
+${FILTRO_STATUS_TODOS}                  todos
+
+
 *** Keywords ***
 Aguardar API Disponivel
     [Documentation]    Polling no /health ate o DbContextCheck retornar Healthy.

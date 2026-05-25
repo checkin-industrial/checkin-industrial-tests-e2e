@@ -67,7 +67,7 @@ Empresas - Criar, filtrar e buscar vizinhos
     Deletar Empresa    ${id_base}
     Deletar Empresa    ${id_vizinha}
     ${depois}=    Buscar Empresa    ${id_base}
-    Should Be Equal As Strings    ${depois['status']}    inativo
+    Should Be Equal As Strings    ${depois['status']}    ${STATUS_INATIVO}
 
 
 Pontos Institucionais - CRUD com filtro por tipo

@@ -18,13 +18,6 @@ Resource    ../resources/keywords/empresas_api.resource
 Suite Setup    Aguardar API Disponivel
 
 
-*** Variables ***
-# Enums serializados como string camelCase (JsonStringEnumConverter).
-${STATUS_ATIVO}                ativo
-${STATUS_INATIVO}              inativo
-${STATUS_AGUARDANDO_REVISAO}   aguardandoRevisao
-
-
 *** Test Cases ***
 Empresa - soft delete + reativacao
     [Documentation]    Ciclo completo de soft delete e reativacao de uma empresa via PUT.
@@ -39,11 +32,11 @@ Empresa - soft delete + reativacao
     Should Be Equal As Strings    ${detalhe['status']}    ${STATUS_ATIVO}
 
     # Aparece em ?status=ativo e nao em ?status=inativo
-    ${ativas}=    Filtrar Empresas    nomeFantasia=${nome}    status=ativo
+    ${ativas}=    Filtrar Empresas    nomeFantasia=${nome}    status=${FILTRO_STATUS_ATIVO}
     ${ids_ativas}=    Evaluate    [e['id'] for e in $ativas]
     Should Contain    ${ids_ativas}    ${id}
 
-    ${inativas}=    Filtrar Empresas    nomeFantasia=${nome}    status=inativo
+    ${inativas}=    Filtrar Empresas    nomeFantasia=${nome}    status=${FILTRO_STATUS_INATIVO}
     ${ids_inativas}=    Evaluate    [e['id'] for e in $inativas]
     Should Not Contain    ${ids_inativas}    ${id}
 
@@ -53,11 +46,11 @@ Empresa - soft delete + reativacao
     Should Be Equal As Strings    ${apos_delete['status']}    ${STATUS_INATIVO}
 
     # Inverte na filtragem
-    ${ativas_apos}=    Filtrar Empresas    nomeFantasia=${nome}    status=ativo
+    ${ativas_apos}=    Filtrar Empresas    nomeFantasia=${nome}    status=${FILTRO_STATUS_ATIVO}
     ${ids_ativas_apos}=    Evaluate    [e['id'] for e in $ativas_apos]
     Should Not Contain    ${ids_ativas_apos}    ${id}
 
-    ${inativas_apos}=    Filtrar Empresas    nomeFantasia=${nome}    status=inativo
+    ${inativas_apos}=    Filtrar Empresas    nomeFantasia=${nome}    status=${FILTRO_STATUS_INATIVO}
     ${ids_inativas_apos}=    Evaluate    [e['id'] for e in $inativas_apos]
     Should Contain    ${ids_inativas_apos}    ${id}
 
@@ -67,7 +60,7 @@ Empresa - soft delete + reativacao
     Should Be Equal As Strings    ${reativada['status']}    ${STATUS_ATIVO}
 
     # Volta a aparecer no filtro de ativas
-    ${ativas_final}=    Filtrar Empresas    nomeFantasia=${nome}    status=ativo
+    ${ativas_final}=    Filtrar Empresas    nomeFantasia=${nome}    status=${FILTRO_STATUS_ATIVO}
     ${ids_final}=    Evaluate    [e['id'] for e in $ativas_final]
     Should Contain    ${ids_final}    ${id}
 
