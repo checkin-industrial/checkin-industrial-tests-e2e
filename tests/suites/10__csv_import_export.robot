@@ -26,11 +26,15 @@ Suite Setup    Aguardar API Disponivel
 *** Variables ***
 ${EMPRESAS_CSV_FIXTURE}    ${CURDIR}/../resources/fixtures/csv/empresas-import-sample.csv
 ${PONTOS_CSV_FIXTURE}      ${CURDIR}/../resources/fixtures/csv/pontos-import-sample.csv
+# BOM UTF-8 (EF BB BF) usado pra validar o prefixo do export em bytes —
+# requests.text decodifica utf-8-sig e remove o BOM automaticamente, entao
+# precisamos validar via response.content pra evitar flake.
+${UTF8_BOM_BYTES}    ${{bytes([0xEF, 0xBB, 0xBF])}}
 
 
 *** Test Cases ***
 Empresas - Import CSV com 2 linhas validas
-    [Documentation]    Upload de CSV com 2 empresas valids. Espera totalRecords=2
+    [Documentation]    Upload de CSV com 2 empresas validas. Espera totalRecords=2
     ...                e inserted=2 (banco zerado entre runs) ou updated=2 (re-run).
     [Tags]    csv    empresas    e2e
 
@@ -59,8 +63,12 @@ Empresas - Export CSV UTF-8 retorna text/csv com Content-Disposition
     ${response}=    Exportar Empresas CSV    ansi=${FALSE}
     Should Contain    ${response.headers['Content-Type']}    text/csv
     Should Contain    ${response.headers['Content-Disposition']}    .csv
-    # CSV UTF-8 BOM (EF BB BF) -> string comeca com ﻿ em python
-    Should Start With    ${response.text}    ﻿CNPJ
+    # Validacao em bytes (response.content) — response.text usa utf-8-sig e
+    # remove o BOM automaticamente, mascarando regressoes no encoding.
+    ${prefix}=    Evaluate    $response.content[:3]
+    Should Be Equal    ${prefix}    ${UTF8_BOM_BYTES}
+    ${after_bom}=    Evaluate    $response.content[3:].decode('utf-8')
+    Should Start With    ${after_bom}    CNPJ
 
 
 Empresas - Export CSV ANSI retorna text/csv sem BOM
@@ -70,7 +78,9 @@ Empresas - Export CSV ANSI retorna text/csv sem BOM
     ${response}=    Exportar Empresas CSV    ansi=${TRUE}
     Should Contain    ${response.headers['Content-Type']}    text/csv
     Should Contain    ${response.headers['Content-Disposition']}    .csv
-    # ANSI nao tem BOM -> primeiro char eh o "C" do header CNPJ
+    # ANSI nao tem BOM: primeiros 3 bytes devem diferir do BOM UTF-8.
+    ${prefix}=    Evaluate    $response.content[:3]
+    Should Not Be Equal    ${prefix}    ${UTF8_BOM_BYTES}
     Should Start With    ${response.text}    CNPJ
 
 
@@ -83,11 +93,12 @@ Empresas - Export CSV sem X-Api-Key retorna 401
 
 
 Empresas - Import CSV sem X-Api-Key retorna 401
-    [Documentation]    Equivalente do anterior pro endpoint de POST.
+    [Documentation]    Equivalente do anterior pro endpoint de POST. Reusa o helper
+    ...                Multipart Files Para CSV (mesmo file handling do happy path)
+    ...                mas omite o header X-Api-Key.
     [Tags]    csv    empresas    auth    e2e
 
-    ${file_handle}=    Get File    ${EMPRESAS_CSV_FIXTURE}
-    ${files}=    Create Dictionary    file=${file_handle}
+    ${files}=    Multipart Files Para CSV    ${EMPRESAS_CSV_FIXTURE}
     POST    ${API_URL}/api/import/empresas    files=${files}    expected_status=401
 
 
@@ -121,7 +132,10 @@ Pontos Institucionais - Export CSV UTF-8 retorna text/csv com BOM
     ${response}=    Exportar Pontos Institucionais CSV    ansi=${FALSE}
     Should Contain    ${response.headers['Content-Type']}    text/csv
     Should Contain    ${response.headers['Content-Disposition']}    .csv
-    Should Start With    ${response.text}    ﻿Id
+    ${prefix}=    Evaluate    $response.content[:3]
+    Should Be Equal    ${prefix}    ${UTF8_BOM_BYTES}
+    ${after_bom}=    Evaluate    $response.content[3:].decode('utf-8')
+    Should Start With    ${after_bom}    Id
 
 
 Pontos Institucionais - Export CSV sem X-Api-Key retorna 401

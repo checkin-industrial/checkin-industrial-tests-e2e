@@ -172,7 +172,9 @@ A suite cresceu de 3 para 10 arquivos cobrindo API + UI E2E. Inventario:
 | 10 | `10__csv_import_export.robot` | Import/Export CSV de Empresas e Pontos Institucionais via endpoints admin-only `/api/import/{empresas,pontos-institucionais}/{exportar,exportar-ansi}` + POST. Cobre auth (401 sem X-Api-Key), import com fixtures dummy, export UTF-8 com BOM + ANSI sem BOM, cleanup inline. Regressao do bug do painel#43 (handler de export sem X-Api-Key). | API |
 
 **Fixtures**: `tests/resources/fixtures/wiremock/mappings/*.json` (montados read-only no container)
-e `tests/resources/fixtures/csv/*.csv` (dummy data lida pela suite 10 via OperatingSystem.Get File).
+e `tests/resources/fixtures/csv/*.csv` (dummy data lida pela suite 10 via `Get Binary File`
+e tupla `(filename, bytes, mime)` no `files=` do RequestsLibrary — multipart precisa do
+filename real porque a API valida `Path.GetExtension(file.FileName)`).
 **Variables centralizadas**: `tests/resources/keywords/common.resource` (enums StatusEmpresa,
 SetorEmpresa, PorteEmpresa, MatrizOuFilial, SituacaoCadastral) + `tests/resources/variables/env.yaml`
 (URLs, API_KEY, timeouts UI).
