@@ -156,7 +156,7 @@ falhar com 403. Solucao: criar um fine-grained PAT com `contents:read` no repo d
 
 ## Suites (estado atual)
 
-A suite cresceu de 3 para 9 arquivos cobrindo API + UI E2E. Inventario:
+A suite cresceu de 3 para 10 arquivos cobrindo API + UI E2E. Inventario:
 
 | # | Arquivo | Cobertura | Tipo |
 |---|---|---|---|
@@ -169,8 +169,12 @@ A suite cresceu de 3 para 9 arquivos cobrindo API + UI E2E. Inventario:
 | 07 | `07__ui_google_maps_import.robot` | UI do fluxo Google Maps Import: form dispara busca e mostra resultados (tipo vazio); import com criados aparece em "Aguardando revisao" + botao "Ir para revisar" leva ao gestao. | UI (Browser) |
 | 08 | `08__fluentvalidation_400.robot` | FluentValidation rejeita payloads invalidos com HTTP 400 ProblemDetails (RFC 7807): CNPJ malformado, CEP fora do padrao, lat/long fora de range, email invalido, campos obrigatorios vazios, etc. | API |
 | 09 | `09__ui_crud_admin_completo.robot` | UI fluxo admin completo de Empresas: editar via modal, excluir (soft-delete via window.confirm), reativar empresa inativa pelo filtro "inativo" -> botao "Reativar". | UI (Browser) |
+| 10 | `10__csv_import_export.robot` | Import/Export CSV de Empresas e Pontos Institucionais via endpoints admin-only `/api/import/{empresas,pontos-institucionais}/{exportar,exportar-ansi}` + POST. Cobre auth (401 sem X-Api-Key), import com fixtures dummy, export UTF-8 com BOM + ANSI sem BOM, cleanup inline. Regressao do bug do painel#43 (handler de export sem X-Api-Key). | API |
 
-**Fixtures**: `tests/resources/fixtures/wiremock/mappings/*.json` (montados read-only no container).
+**Fixtures**: `tests/resources/fixtures/wiremock/mappings/*.json` (montados read-only no container)
+e `tests/resources/fixtures/csv/*.csv` (dummy data lida pela suite 10 via `Get Binary File`
+e tupla `(filename, bytes, mime)` no `files=` do RequestsLibrary — multipart precisa do
+filename real porque a API valida `Path.GetExtension(file.FileName)`).
 **Variables centralizadas**: `tests/resources/keywords/common.resource` (enums StatusEmpresa,
 SetorEmpresa, PorteEmpresa, MatrizOuFilial, SituacaoCadastral) + `tests/resources/variables/env.yaml`
 (URLs, API_KEY, timeouts UI).

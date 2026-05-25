@@ -1,0 +1,148 @@
+*** Settings ***
+Documentation     Cobertura E2E para os endpoints CSV de Empresas e Pontos
+...               Institucionais. Todos os 6 endpoints sao admin-only
+...               (RequireAuthorization em Importacao{Empresas,PontosInstitucionais}Module.cs).
+...
+...               Cenarios:
+...                 - Import: upload de CSV valido -> totalRecords/inserted/updated/skipped/errors
+...                 - Export UTF-8: GET retorna text/csv + Content-Disposition + BOM
+...                 - Export ANSI: GET retorna text/csv (Windows-1252)
+...                 - Auth: GET sem X-Api-Key retorna 401
+...
+...               Bug corrigido pelo painel#43: handleExportCsv usava fetch direto
+...               sem X-Api-Key e quebrava em prod. A suite mantem cobertura de
+...               regressao no contrato da API (validacao do header obrigatorio).
+
+Library     RequestsLibrary
+Library     Collections
+Library     OperatingSystem
+Resource    ../resources/keywords/common.resource
+Resource    ../resources/keywords/empresas_api.resource
+Resource    ../resources/keywords/import_csv_api.resource
+
+Suite Setup    Aguardar API Disponivel
+
+
+*** Variables ***
+${EMPRESAS_CSV_FIXTURE}    ${CURDIR}/../resources/fixtures/csv/empresas-import-sample.csv
+${PONTOS_CSV_FIXTURE}      ${CURDIR}/../resources/fixtures/csv/pontos-import-sample.csv
+# BOM UTF-8 (EF BB BF) usado pra validar o prefixo do export em bytes —
+# requests.text decodifica utf-8-sig e remove o BOM automaticamente, entao
+# precisamos validar via response.content pra evitar flake.
+${UTF8_BOM_BYTES}    ${{bytes([0xEF, 0xBB, 0xBF])}}
+
+
+*** Test Cases ***
+Empresas - Import CSV com 2 linhas validas
+    [Documentation]    Upload de CSV com 2 empresas validas. Espera totalRecords=2
+    ...                e inserted=2 (banco zerado entre runs) ou updated=2 (re-run).
+    [Tags]    csv    empresas    e2e
+
+    ${result}=    Importar Empresas CSV    ${EMPRESAS_CSV_FIXTURE}
+    Should Be Equal As Integers    ${result['totalRecords']}    ${2}
+    ${processados}=    Evaluate    ${result['inserted']} + ${result['updated']}
+    Should Be Equal As Integers    ${processados}    ${2}
+    Should Be Equal As Integers    ${result['skipped']}    ${0}
+    Length Should Be    ${result['errors']}    ${0}
+
+    # Cleanup: deleta as 2 empresas pra evitar lixo entre runs.
+    # Usar params=... ao inves de query string inline (RequestsLibrary se
+    # confunde com '=' no URL e disparou "session_less_get missing url").
+    ${params}=    Create Dictionary    status=todos
+    ${response}=    GET    url=${API_URL}/api/empresas/filter    params=${params}    expected_status=200
+    ${empresas}=    Set Variable    ${response.json()}
+    FOR    ${empresa}    IN    @{empresas}
+        Continue For Loop If    'CSV Teste' not in $empresa.get('nomeFantasia', '')
+        Deletar Empresa    ${empresa['id']}
+    END
+
+
+Empresas - Export CSV UTF-8 retorna text/csv com Content-Disposition
+    [Documentation]    GET /api/import/empresas/exportar com X-Api-Key:
+    ...                Content-Type text/csv, header Content-Disposition presente,
+    ...                body comeca com BOM (UTF-8) seguido do header CSV.
+    [Tags]    csv    empresas    e2e
+
+    ${response}=    Exportar Empresas CSV    ansi=${FALSE}
+    Should Contain    ${response.headers['Content-Type']}    text/csv
+    Should Contain    ${response.headers['Content-Disposition']}    .csv
+    # Validacao em bytes (response.content) — response.text usa utf-8-sig e
+    # remove o BOM automaticamente, mascarando regressoes no encoding.
+    ${prefix}=    Evaluate    $response.content[:3]
+    Should Be Equal    ${prefix}    ${UTF8_BOM_BYTES}
+    ${after_bom}=    Evaluate    $response.content[3:].decode('utf-8')
+    Should Start With    ${after_bom}    CNPJ
+
+
+Empresas - Export CSV ANSI retorna text/csv sem BOM
+    [Documentation]    Variante Windows-1252: mesmo content-type mas sem BOM.
+    [Tags]    csv    empresas    e2e
+
+    ${response}=    Exportar Empresas CSV    ansi=${TRUE}
+    Should Contain    ${response.headers['Content-Type']}    text/csv
+    Should Contain    ${response.headers['Content-Disposition']}    .csv
+    # ANSI nao tem BOM: primeiros 3 bytes devem diferir do BOM UTF-8.
+    ${prefix}=    Evaluate    $response.content[:3]
+    Should Not Be Equal    ${prefix}    ${UTF8_BOM_BYTES}
+    Should Start With    ${response.text}    CNPJ
+
+
+Empresas - Export CSV sem X-Api-Key retorna 401
+    [Documentation]    Bug que motivou painel#43: o handler usava fetch direto
+    ...                sem header. Aqui validamos o contrato: sem X-Api-Key, 401.
+    [Tags]    csv    empresas    auth    e2e
+
+    GET    ${API_URL}/api/import/empresas/exportar    expected_status=401
+
+
+Empresas - Import CSV sem X-Api-Key retorna 401
+    [Documentation]    Equivalente do anterior pro endpoint de POST. Reusa o helper
+    ...                Multipart Files Para CSV (mesmo file handling do happy path)
+    ...                mas omite o header X-Api-Key.
+    [Tags]    csv    empresas    auth    e2e
+
+    ${files}=    Multipart Files Para CSV    ${EMPRESAS_CSV_FIXTURE}
+    POST    ${API_URL}/api/import/empresas    files=${files}    expected_status=401
+
+
+Pontos Institucionais - Import CSV com 2 linhas validas
+    [Documentation]    Upload com 2 pontos institucionais. Banco zerado entre runs
+    ...                tipicamente -> 2 inserted; em re-run vira updated (dedup
+    ...                por nome+endereco+tipo conforme ImportPontosInstitucionais.cs).
+    [Tags]    csv    pontos    e2e
+
+    ${result}=    Importar Pontos Institucionais CSV    ${PONTOS_CSV_FIXTURE}
+    Should Be Equal As Integers    ${result['totalRecords']}    ${2}
+    ${processados}=    Evaluate    ${result['inserted']} + ${result['updated']}
+    Should Be Equal As Integers    ${processados}    ${2}
+    Should Be Equal As Integers    ${result['skipped']}    ${0}
+    Length Should Be    ${result['errors']}    ${0}
+
+    # Cleanup: deleta os 2 pontos via API normal (soft delete -> Ativo=false)
+    ${response}=    GET    ${API_URL}/api/pontos-institucionais    expected_status=200
+    ${pontos}=    Set Variable    ${response.json()}
+    ${headers}=    Headers Com Api Key
+    FOR    ${ponto}    IN    @{pontos}
+        Continue For Loop If    'CSV Teste' not in $ponto.get('nome', '')
+        DELETE    ${API_URL}/api/pontos-institucionais/${ponto['id']}    headers=${headers}    expected_status=204
+    END
+
+
+Pontos Institucionais - Export CSV UTF-8 retorna text/csv com BOM
+    [Documentation]    Equivalente do export de Empresas. Header esperado: Id;Nome;...
+    [Tags]    csv    pontos    e2e
+
+    ${response}=    Exportar Pontos Institucionais CSV    ansi=${FALSE}
+    Should Contain    ${response.headers['Content-Type']}    text/csv
+    Should Contain    ${response.headers['Content-Disposition']}    .csv
+    ${prefix}=    Evaluate    $response.content[:3]
+    Should Be Equal    ${prefix}    ${UTF8_BOM_BYTES}
+    ${after_bom}=    Evaluate    $response.content[3:].decode('utf-8')
+    Should Start With    ${after_bom}    Id
+
+
+Pontos Institucionais - Export CSV sem X-Api-Key retorna 401
+    [Documentation]    Mesma validacao de contrato auth-required.
+    [Tags]    csv    pontos    auth    e2e
+
+    GET    ${API_URL}/api/import/pontos-institucionais/exportar    expected_status=401
