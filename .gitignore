@@ -7,3 +7,7 @@ gh-pages/
 __pycache__/
 *.pyc
 .venv/
+
+# Local secrets (Google Maps key, etc) - usar .env.example como template
+.env
+**/.env
