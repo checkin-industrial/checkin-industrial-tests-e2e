@@ -1,0 +1,3 @@
+CNPJ;Razao_Social;Nome_Fantasia;CNAE_Principal;Setor;Porte;Numero_Funcionarios;Endereco;Telefone;CEP;Municipio;Descricao_CNAE;Matriz_ou_Filial;Latitude;Longitude;Situacao_Cadastral
+11222333000181;Empresa CSV Teste Alfa LTDA;CSV Teste Alfa;4751201;industria;me;15;Rua das Industrias, 100;1133331111;01310200;Sao Paulo;Comercio varejista;matriz;-23.55052;-46.633308;ativa
+12345678000195;Empresa CSV Teste Beta LTDA;CSV Teste Beta;4711301;comercio;epp;30;Av Comercio, 200;1133332222;01310300;Sao Paulo;Comercio atacadista;matriz;-23.55100;-46.633500;ativa
