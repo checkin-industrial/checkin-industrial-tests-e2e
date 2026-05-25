@@ -49,9 +49,21 @@ services:
       # GoogleMaps: lido de docker-compose/.env (nao commitado).
       # Sem ApiKey, endpoints de import retornam erro 500 ao chamar Places API.
       # Default vazio permite subir a stack mesmo sem chave (testes que nao tocam
-      # Google Maps continuam funcionando). Para a region/raio defaults usar
-      # os de appsettings.json (Bauru/SP) ou override aqui.
+      # Google Maps continuam funcionando).
       GoogleMaps__ApiKey: ${GOOGLE_MAPS_API_KEY:-}
+      # AllowedRegion: bounding box que valida o CEP geocodificado. Defaults
+      # cobrem Lencois Paulista/SP + Bauru regiao com buffer pra absorver
+      # fuzziness do Nominatim em CEPs locais (que as vezes geolocaliza
+      # alguns km fora do municipio). Override em prod via env do host pra
+      # restringir ao municipio real atendido — em prod, bounds amplos =
+      # quota GCP queimando.
+      GoogleMaps__AllowedRegion__LatMin: ${GMAPS_LAT_MIN:--23.0}
+      GoogleMaps__AllowedRegion__LatMax: ${GMAPS_LAT_MAX:--21.5}
+      GoogleMaps__AllowedRegion__LngMin: ${GMAPS_LNG_MIN:--49.2}
+      GoogleMaps__AllowedRegion__LngMax: ${GMAPS_LNG_MAX:--47.9}
+      # MaxRaioMetros: cap do raio em busca Nearby. Default appsettings.json eh
+      # 1000m (1km); ampliado pra 10km em dev pra cenarios de teste maiores.
+      GoogleMaps__MaxRaioMetros: ${GMAPS_MAX_RAIO_METROS:-10000}
     volumes:
       - api_uploads:/uploads
     ports:
