@@ -40,6 +40,12 @@ services:
       ConnectionStrings__DefaultConnectionTurismo: "Server=postgres;Port=5432;Database=${POSTGRES_DB:-turismoindustrial};User Id=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres};"
       # Habilita servir /uploads a partir do volume montado abaixo (Program.cs:81)
       UPLOADS_ROOT: /uploads
+      # Auth admin: chave esperada no header X-Api-Key em endpoints de escrita.
+      # Atencao: o handler retorna NoResult quando vazio + RequireAuthorization
+      # responde 401 mesmo assim — entao em dev local *precisa* de chave nao-vazia
+      # pra logar no painel admin. Default abaixo funciona out-of-the-box; override
+      # via AUTH_API_KEY em docker-compose/.env. Em prod, sempre vir do host (Railway).
+      Auth__ApiKey: ${AUTH_API_KEY:-dev-api-key-checkin-industrial-2026}
       # GoogleMaps: lido de docker-compose/.env (nao commitado).
       # Sem ApiKey, endpoints de import retornam erro 500 ao chamar Places API.
       # Default vazio permite subir a stack mesmo sem chave (testes que nao tocam
