@@ -45,8 +45,11 @@ Empresas - Import CSV com 2 linhas validas
     Should Be Equal As Integers    ${result['skipped']}    ${0}
     Length Should Be    ${result['errors']}    ${0}
 
-    # Cleanup: deleta as 2 empresas pra evitar lixo entre runs
-    ${response}=    GET    ${API_URL}/api/empresas/filter?status=todos    expected_status=200
+    # Cleanup: deleta as 2 empresas pra evitar lixo entre runs.
+    # Usar params=... ao inves de query string inline (RequestsLibrary se
+    # confunde com '=' no URL e disparou "session_less_get missing url").
+    ${params}=    Create Dictionary    status=todos
+    ${response}=    GET    url=${API_URL}/api/empresas/filter    params=${params}    expected_status=200
     ${empresas}=    Set Variable    ${response.json()}
     FOR    ${empresa}    IN    @{empresas}
         Continue For Loop If    'CSV Teste' not in $empresa.get('nomeFantasia', '')
