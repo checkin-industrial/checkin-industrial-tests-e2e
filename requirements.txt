@@ -3,5 +3,5 @@ robotframework-requests==0.9.7
 # Browser library para UI E2E (Playwright underneath). Apos `pip install`,
 # rodar `rfbrowser init` para baixar os binarios do Chromium/Firefox/WebKit.
 robotframework-browser==19.0.0
-allure-robotframework==2.13.5
+allure-robotframework==2.16.0
 pyyaml==6.0.2
