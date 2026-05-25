@@ -29,11 +29,11 @@ Empresa criada via API aparece na lista admin
 
     Abrir Painel Pagina Inicial
     Logar Como Admin    tab_label=Empresas
-    Wait For Elements State    text="Empresas Cadastradas"    visible    timeout=15s
+    Wait For Elements State    text="Empresas Cadastradas"    visible    timeout=${UI_DEFAULT_TIMEOUT}
 
     # Empresa nova esta com Status=Ativo (default) - filtro "ativo" do dropdown
     # ja vem selecionado. Nome fantasia aparece na coluna "Nome Fantasia".
-    Wait For Elements State    text=${nome}    visible    timeout=10s
+    Wait For Elements State    text=${nome}    visible    timeout=${UI_SHORT_TIMEOUT}
 
     # Cleanup
     Deletar Empresa    ${id}
@@ -53,11 +53,11 @@ Soft-delete via API esconde empresa do filtro "ativo" e mostra em "inativo"
 
     Abrir Painel Pagina Inicial
     Logar Como Admin    tab_label=Empresas
-    Wait For Elements State    text="Empresas Cadastradas"    visible    timeout=15s
+    Wait For Elements State    text="Empresas Cadastradas"    visible    timeout=${UI_DEFAULT_TIMEOUT}
 
     # Filtro default "ativo" NAO deve listar a empresa soft-deletada
-    Wait For Elements State    text=${nome}    hidden    timeout=10s
+    Wait For Elements State    text=${nome}    hidden    timeout=${UI_SHORT_TIMEOUT}
 
     # Troca pra filtro "inativo" - deve aparecer
     Aplicar Filtro Status Admin    inativo
-    Wait For Elements State    text=${nome}    visible    timeout=10s
+    Wait For Elements State    text=${nome}    visible    timeout=${UI_SHORT_TIMEOUT}

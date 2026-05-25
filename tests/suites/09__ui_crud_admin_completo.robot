@@ -34,13 +34,13 @@ Editar empresa via modal de edicao admin
 
     Abrir Painel Pagina Inicial
     Logar Como Admin    tab_label=Empresas
-    Wait For Elements State    text="Empresas Cadastradas"    visible    timeout=15s
-    Wait For Elements State    text=${nome_inicial}    visible    timeout=10s
+    Wait For Elements State    text="Empresas Cadastradas"    visible    timeout=${UI_DEFAULT_TIMEOUT}
+    Wait For Elements State    text=${nome_inicial}    visible    timeout=${UI_SHORT_TIMEOUT}
 
     # Click no Editar da linha - usa XPath ancorado no nome inicial pra
     # garantir que estamos na linha certa (evita pegar Editar de outra row).
     Click    xpath=//tr[td//strong[normalize-space()="${nome_inicial}"]]//button[normalize-space()="Editar"]
-    Wait For Elements State    text="Editar Empresa"    visible    timeout=10s
+    Wait For Elements State    text="Editar Empresa"    visible    timeout=${UI_SHORT_TIMEOUT}
 
     # Substitui o Nome Fantasia. Selector pelo label - input segue o label
     # textual no form. Limpa antes pra nao concatenar.
@@ -50,8 +50,8 @@ Editar empresa via modal de edicao admin
     Click    css=button[type="submit"]
 
     # Modal fecha + lista re-renderiza com novo nome
-    Wait For Elements State    text="Editar Empresa"    hidden    timeout=10s
-    Wait For Elements State    text=${nome_novo}    visible    timeout=10s
+    Wait For Elements State    text="Editar Empresa"    hidden    timeout=${UI_SHORT_TIMEOUT}
+    Wait For Elements State    text=${nome_novo}    visible    timeout=${UI_SHORT_TIMEOUT}
 
     # Persistencia confirmada via API
     ${detalhe}=    Buscar Empresa    ${id}
@@ -74,8 +74,8 @@ Excluir empresa via UI: soft-delete confirmado por API
 
     Abrir Painel Pagina Inicial
     Logar Como Admin    tab_label=Empresas
-    Wait For Elements State    text="Empresas Cadastradas"    visible    timeout=15s
-    Wait For Elements State    text=${nome}    visible    timeout=10s
+    Wait For Elements State    text="Empresas Cadastradas"    visible    timeout=${UI_DEFAULT_TIMEOUT}
+    Wait For Elements State    text=${nome}    visible    timeout=${UI_SHORT_TIMEOUT}
 
     # Browser library: pre-aceitar o proximo window.confirm que aparecer.
     # window.confirm e nativo - o handler nao pode esperar; tem que estar
@@ -85,7 +85,7 @@ Excluir empresa via UI: soft-delete confirmado por API
     Click    xpath=//tr[td//strong[normalize-space()="${nome}"]]//button[normalize-space()="Excluir"]
 
     # Filtro default "ativo": linha desaparece
-    Wait For Elements State    text=${nome}    hidden    timeout=10s
+    Wait For Elements State    text=${nome}    hidden    timeout=${UI_SHORT_TIMEOUT}
 
     # Backend confirma soft-delete: status virou "inativo"
     ${detalhe}=    Buscar Empresa    ${id}
@@ -106,7 +106,7 @@ Reativar empresa inativa via UI: volta ao estado ativo
 
     Abrir Painel Pagina Inicial
     Logar Como Admin    tab_label=Empresas
-    Wait For Elements State    text="Empresas Cadastradas"    visible    timeout=15s
+    Wait For Elements State    text="Empresas Cadastradas"    visible    timeout=${UI_DEFAULT_TIMEOUT}
 
     # Filtra inativos. Aguarda em 2 passos pra mitigar race entre mudanca de
     # statusFiltro -> useQuery refetch -> render:
@@ -117,9 +117,9 @@ Reativar empresa inativa via UI: volta ao estado ativo
     # Cada wait independente da uma janela de 15s, total margem >> tempo de
     # qualquer round-trip realistico do CI.
     Aplicar Filtro Status Admin    inativo
-    Wait For Elements State    xpath=//strong[normalize-space()="${nome}"]    visible    timeout=15s
+    Wait For Elements State    xpath=//strong[normalize-space()="${nome}"]    visible    timeout=${UI_DEFAULT_TIMEOUT}
     ${reativar_btn}=    Set Variable    xpath=//tr[td//strong[normalize-space()="${nome}"]]//button[normalize-space()="Reativar"]
-    Wait For Elements State    ${reativar_btn}    visible    timeout=15s
+    Wait For Elements State    ${reativar_btn}    visible    timeout=${UI_DEFAULT_TIMEOUT}
 
     Click    ${reativar_btn}
 
@@ -127,11 +127,11 @@ Reativar empresa inativa via UI: volta ao estado ativo
     # porque a mensagem de sucesso "Empresa '<nome>' reativada com sucesso"
     # tambem contem o nome e Playwright `text=` faz substring match - o <p>
     # da mensagem nunca fica hidden, o wait nunca termina.
-    Wait For Elements State    xpath=//strong[normalize-space()="${nome}"]    hidden    timeout=10s
+    Wait For Elements State    xpath=//strong[normalize-space()="${nome}"]    hidden    timeout=${UI_SHORT_TIMEOUT}
 
     # Aparece no filtro ativo
     Aplicar Filtro Status Admin    ativo
-    Wait For Elements State    xpath=//strong[normalize-space()="${nome}"]    visible    timeout=10s
+    Wait For Elements State    xpath=//strong[normalize-space()="${nome}"]    visible    timeout=${UI_SHORT_TIMEOUT}
 
     # API confirma status ativo
     ${detalhe}=    Buscar Empresa    ${id}
