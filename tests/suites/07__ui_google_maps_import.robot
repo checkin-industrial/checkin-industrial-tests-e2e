@@ -34,7 +34,7 @@ Form de import dispara busca e mostra resultados
 
     Abrir Painel Pagina Inicial
     Logar Como Admin    tab_label=Importar do Google Maps
-    Wait For Elements State    text="Importar Empresas do Google Maps"    visible    timeout=15s
+    Wait For Elements State    text="Importar Empresas do Google Maps"    visible    timeout=${UI_DEFAULT_TIMEOUT}
 
     # CEP input - placeholder "17012000" como dica
     Fill Text    css=input[placeholder="17012000"]    ${CEP_BAURU}
@@ -46,7 +46,7 @@ Form de import dispara busca e mostra resultados
     # Resultado renderiza com header "Resultado da importação".
     # Conteudo exato (counts) e validado pela suite 04 via API - aqui so
     # confirmamos que a UI renderizou o bloco de resultados.
-    Wait For Elements State    text="Resultado da importação"    visible    timeout=15s
+    Wait For Elements State    text="Resultado da importação"    visible    timeout=${UI_DEFAULT_TIMEOUT}
 
 
 Import com criados aparece em "Aguardando revisao" na Gestao Empresas
@@ -66,26 +66,26 @@ Import com criados aparece em "Aguardando revisao" na Gestao Empresas
 
     Abrir Painel Pagina Inicial
     Logar Como Admin    tab_label=Importar do Google Maps
-    Wait For Elements State    text="Importar Empresas do Google Maps"    visible    timeout=15s
+    Wait For Elements State    text="Importar Empresas do Google Maps"    visible    timeout=${UI_DEFAULT_TIMEOUT}
 
     Fill Text    css=input[placeholder="17012000"]    ${CEP_BAURU}
     Select Options By    css=select    value    banco
     Click    css=button[type="submit"]
 
-    Wait For Elements State    text="Resultado da importação"    visible    timeout=15s
+    Wait For Elements State    text="Resultado da importação"    visible    timeout=${UI_DEFAULT_TIMEOUT}
     # "Ir para revisar" so aparece se result.criados > 0
     Wait For Elements State    text="Ir para revisar empresas aguardando aprovação"    visible    timeout=5s
     Click    text="Ir para revisar empresas aguardando aprovação"
 
     # Aterrissa em Gestao Empresas
-    Wait For Elements State    text="Empresas Cadastradas"    visible    timeout=15s
+    Wait For Elements State    text="Empresas Cadastradas"    visible    timeout=${UI_DEFAULT_TIMEOUT}
     # Aplica filtro pra ver so AguardandoRevisao
-    Aplicar Filtro Status Admin    aguardando-revisao
+    Aplicar Filtro Status Admin    ${FILTRO_STATUS_AGUARDANDO_REVISAO}
     # Mapping retorna "Banco UI Test Alfa"
-    Wait For Elements State    text="Banco UI Test Alfa"    visible    timeout=10s
+    Wait For Elements State    text="Banco UI Test Alfa"    visible    timeout=${UI_SHORT_TIMEOUT}
 
     # Cleanup: pega ids das empresas criadas nesse mapping e deleta
-    ${ativas}=    Filtrar Empresas    nomeFantasia=Banco UI Test    status=aguardando-revisao
+    ${ativas}=    Filtrar Empresas    nomeFantasia=Banco UI Test    status=${FILTRO_STATUS_AGUARDANDO_REVISAO}
     FOR    ${empresa}    IN    @{ativas}
         Deletar Empresa    ${empresa['id']}
     END

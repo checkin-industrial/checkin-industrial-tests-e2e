@@ -25,7 +25,7 @@ Painel publico - mapa carrega com titulo correto
     Abrir Painel Pagina Inicial
     # Validacoes minimas: titulo no menu + um botao conhecido (Telefones Uteis)
     Get Text    text="Mapa Industrial"    ==    Mapa Industrial
-    Wait For Elements State    text="Telefones Úteis"    visible    timeout=10s
+    Wait For Elements State    text="Telefones Úteis"    visible    timeout=${UI_SHORT_TIMEOUT}
 
 
 Painel publico - filtros aparecem ao abrir painel de filtros
@@ -52,5 +52,5 @@ Login admin - chave correta destrava tela de Gestao Empresas
     Abrir Painel Pagina Inicial
     Logar Como Admin    tab_label=Empresas
     # Confirma que aterrissou na ManagementScreen
-    Wait For Elements State    text="Empresas Cadastradas"    visible    timeout=15s
-    Wait For Elements State    text="Nova Empresa"    visible    timeout=10s
+    Wait For Elements State    text="Empresas Cadastradas"    visible    timeout=${UI_DEFAULT_TIMEOUT}
+    Wait For Elements State    text="Nova Empresa"    visible    timeout=${UI_SHORT_TIMEOUT}

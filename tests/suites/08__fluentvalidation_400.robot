@@ -35,18 +35,18 @@ Payload Empresa Valido
     ...    razaoSocial=Empresa Validacao Teste LTDA
     ...    nomeFantasia=Validacao Teste
     ...    cnaePrincipal=4751201
-    ...    setor=industria
-    ...    porte=me
+    ...    setor=${SETOR_INDUSTRIA}
+    ...    porte=${PORTE_ME}
     ...    numeroFuncionarios=${5}
     ...    endereco=Rua Teste, 100
     ...    telefone=1133334444
     ...    cep=01310200
     ...    municipio=Sao Paulo
     ...    descricaoCnae=Comercio varejista
-    ...    matrizOuFilial=matriz
+    ...    matrizOuFilial=${MATRIZ_OU_FILIAL_MATRIZ}
     ...    latitude=${EMPRESA_BASE_OK_LAT}
     ...    longitude=${EMPRESA_BASE_OK_LNG}
-    ...    situacaoCadastral=ativa
+    ...    situacaoCadastral=${SITUACAO_ATIVA}
     RETURN    ${body}
 
 POST Empresa Espera 400

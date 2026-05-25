@@ -154,22 +154,26 @@ O step "Checkout API repo" usa o `GITHUB_TOKEN` default. Em orgs com Actions res
 falhar com 403. Solucao: criar um fine-grained PAT com `contents:read` no repo da API e usar como
 `token: ${{ secrets.API_REPO_TOKEN }}` no checkout.
 
-## Roadmap (suites futuras)
+## Suites (estado atual)
 
-Ordem sugerida, do mais simples ao mais complexo:
+A suite cresceu de 3 para 9 arquivos cobrindo API + UI E2E. Inventario:
 
-1. **03__cnpj_duplicado**: POST empresa → POST de novo com mesmo CNPJ → 409.
-2. **04__heatmap_analytics**: cria N empresas em coordenadas variadas → GET `/api/analytics/heatmap`
-   → verifica pontos retornados.
-3. **05__upload_imagem**: POST multipart em `/api/pontos-institucionais/upload-imagem` → confirma
-   URL retornada acessivel via `GET {URL}` (testa o servidor estatico `/uploads/...`).
-4. **06__importacao_empresas_csv**: POST CSV → confirma empresas criadas → GET `/exportar` retorna o
-   mesmo conteudo.
-5. **07__geocoding**: POST `/api/empresas/geocode` com endereco → confirma lat/long no response
-   (com WireMock para Nominatim caso queira evitar dependencia externa).
+| # | Arquivo | Cobertura | Tipo |
+|---|---|---|---|
+| 01 | `01__caminho_feliz.robot` | Smoke E2E CRUD: Telefones Uteis, Empresas (criar + filtrar + vizinhanca + delete) e Pontos Institucionais. Garante que o pipeline ponta-a-ponta esta integro. | API |
+| 02 | `02__auth_api_key.robot` | Esquema X-Api-Key: read anonimo (200), write sem header (401), write com header invalido (401), write com header valido (201/204). | API |
+| 03 | `03__empresa_reativacao.robot` | Ciclo soft-delete + reativacao de Empresa via Status enum (Ativo->Inativo->Ativo). Cobre tambem que empresa inativa nao aparece como vizinha. | API |
+| 04 | `04__google_maps_import.robot` | Importacao via Google Places (mockada via WireMock): cria empresas com Status=AguardandoRevisao, dedup por GooglePlaceId em segundo import, aprovacao promove para Ativo, validacao de tipo nao suportado e raio acima do maximo. | API |
+| 05 | `05__ui_smoke.robot` | UI smoke: painel publico carrega o mapa, painel de filtros abre, login admin destrava tela de Gestao Empresas. | UI (Browser) |
+| 06 | `06__ui_empresa_lista_admin.robot` | UI: empresa criada via API aparece na lista admin; soft-delete via API esconde empresa do filtro "ativo" e mostra em "inativo". | UI (Browser) |
+| 07 | `07__ui_google_maps_import.robot` | UI do fluxo Google Maps Import: form dispara busca e mostra resultados (tipo vazio); import com criados aparece em "Aguardando revisao" + botao "Ir para revisar" leva ao gestao. | UI (Browser) |
+| 08 | `08__fluentvalidation_400.robot` | FluentValidation rejeita payloads invalidos com HTTP 400 ProblemDetails (RFC 7807): CNPJ malformado, CEP fora do padrao, lat/long fora de range, email invalido, campos obrigatorios vazios, etc. | API |
+| 09 | `09__ui_crud_admin_completo.robot` | UI fluxo admin completo de Empresas: editar via modal, excluir (soft-delete via window.confirm), reativar empresa inativa pelo filtro "inativo" -> botao "Reativar". | UI (Browser) |
 
-A partir da suite 4 vale considerar **fixtures** (`tests/resources/fixtures/`) e talvez **WireMock**
-para mockar o Nominatim (parecido com o WireMock do MP no mecanica-hermes).
+**Fixtures**: `tests/resources/fixtures/wiremock/mappings/*.json` (montados read-only no container).
+**Variables centralizadas**: `tests/resources/keywords/common.resource` (enums StatusEmpresa,
+SetorEmpresa, PorteEmpresa, MatrizOuFilial, SituacaoCadastral) + `tests/resources/variables/env.yaml`
+(URLs, API_KEY, timeouts UI).
 
 ## WireMock (Google Places)
 
@@ -180,8 +184,10 @@ no `docker-compose.e2e.yml`, entao **nunca toca a API real do Google** (que cobr
 - Mappings: `tests/resources/fixtures/wiremock/mappings/*.json` (montados read-only no container).
 - Cada arquivo descreve um request matcher + response JSON.
 - Mappings disponiveis hoje:
-  - `google-places-nearby-loja.json` - retorna 2 lugares para `includedTypes=["store"]`.
-  - `google-places-nearby-farmacia-vazio.json` - retorna lista vazia para `includedTypes=["pharmacy"]`.
+  - `google-places-nearby-loja.json` - retorna 2 lugares para `includedTypes=["store"]` (usado pela suite 04 e cobre o dedup por GooglePlaceId no segundo import).
+  - `google-places-nearby-farmacia-vazio.json` - retorna lista vazia para `includedTypes=["pharmacy"]` (suite 07 valida que o UI renderiza "Encontrados: 0" sem efeito colateral).
+  - `google-places-nearby-supermercado.json` - retorna 1 lugar para `includedTypes=["supermarket"]` (suite 04 usa pra ter PlaceId distinto e exercitar o caminho de aprovacao).
+  - `google-places-nearby-banco.json` - retorna 1 lugar "Banco UI Test Alfa" para `includedTypes=["bank"]` (suite 07 usa porque outros tipos ja tem PlaceIds gravados no banco por runs anteriores e o dedup impede criar novas — sem PlaceId fresco, `result.criados=0` e o botao "Ir para revisar" nao renderiza).
 - Sem matching = WireMock retorna 404 (util para testar caminhos de erro).
 - Porta publica: `8089` (configuravel via `WIREMOCK_PORT`).
 - Admin API do WireMock disponivel em `/__admin/` (reset de requests gravadas, contagem de chamadas, etc).
