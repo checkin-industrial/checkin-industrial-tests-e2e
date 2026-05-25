@@ -123,6 +123,29 @@ Import Google Maps - aprovacao promove para Status Ativo
     END
 
 
+Import Google Maps - tipo sem-filtro omite includedTypes na request
+    [Documentation]    Slug "sem-filtro" deve fazer a API enviar request ao Google
+    ...                Places SEM o campo includedTypes (Places API New retorna
+    ...                400 se enviarmos includedTypes vazio). WireMock tem mapping
+    ...                que casa absent=true em $.includedTypes — retorna 2 lugares
+    ...                de tipos distintos.
+    [Tags]    google-maps    import    sem-filtro    e2e
+
+    ${resultado}=    Importar Empresas Via Google Maps    cep=${CEP_BAURU}    tipo=sem-filtro
+    Should Be Equal As Integers    ${resultado['encontrados']}    ${2}
+    Should Be True    ${resultado['criados']} >= ${1}
+
+    # WireMock recebeu a chamada (proof of mapping absent=true matched)
+    ${chamadas}=    Contar Chamadas WireMock Para    /v1/places:searchNearby
+    Should Be True    ${chamadas} >= ${1}
+
+    # Cleanup
+    ${ids_criados}=    Evaluate    [i['empresaId'] for i in $resultado['itens'] if i['acao'] == 'criado']
+    FOR    ${id}    IN    @{ids_criados}
+        Deletar Empresa    ${id}
+    END
+
+
 Import Google Maps - tipo nao suportado retorna 400
     [Documentation]    Tipo desconhecido (nao mapeado em GooglePlaceTypeMapping)
     ...                deve retornar 400 com mensagem de ValidationException.

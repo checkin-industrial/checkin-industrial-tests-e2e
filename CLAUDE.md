@@ -192,6 +192,7 @@ no `docker-compose.e2e.yml`, entao **nunca toca a API real do Google** (que cobr
   - `google-places-nearby-farmacia-vazio.json` - retorna lista vazia para `includedTypes=["pharmacy"]` (suite 07 valida que o UI renderiza "Encontrados: 0" sem efeito colateral).
   - `google-places-nearby-supermercado.json` - retorna 1 lugar para `includedTypes=["supermarket"]` (suite 04 usa pra ter PlaceId distinto e exercitar o caminho de aprovacao).
   - `google-places-nearby-banco.json` - retorna 1 lugar "Banco UI Test Alfa" para `includedTypes=["bank"]` (suite 07 usa porque outros tipos ja tem PlaceIds gravados no banco por runs anteriores e o dedup impede criar novas — sem PlaceId fresco, `result.criados=0` e o botao "Ir para revisar" nao renderiza).
+  - `google-places-nearby-sem-filtro.json` - matcher `absent=true` em `$.includedTypes` (a request sem o campo). Retorna 2 lugares de tipos distintos (restaurant + pharmacy) — exercita o caminho do slug "sem-filtro" da api#22.
 - Sem matching = WireMock retorna 404 (util para testar caminhos de erro).
 - Porta publica: `8089` (configuravel via `WIREMOCK_PORT`).
 - Admin API do WireMock disponivel em `/__admin/` (reset de requests gravadas, contagem de chamadas, etc).
