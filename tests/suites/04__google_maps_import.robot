@@ -5,13 +5,16 @@ Documentation     Importacao de empresas via Google Places API (mockada via Wire
 ...               sao montados read-only e definem respostas pre-cadastradas para o
 ...               endpoint /v1/places:searchNearby do Google.
 ...
-...               Pre-requisito: API deve ter o refactor StatusEmpresa enum (api#15)
-...               + feature GoogleMapsImport (api#13). Imports criam empresas com
-...               Status=AguardandoRevisao (3).
+...               Pre-requisito: API com pipeline de candidates (api#25). Imports
+...               criam GoogleMapsImportCandidate pendentes — NAO criam Empresas
+...               direto. Suite 11 cobre o fluxo de triagem (promote/reject por
+...               destino) e suite 04 foca no contrato basico do endpoint de import
+...               (response shape, dedup por GooglePlaceId, validacoes 400).
 
 Resource    ../resources/keywords/common.resource
 Resource    ../resources/keywords/empresas_api.resource
 Resource    ../resources/keywords/google_maps_api.resource
+Resource    ../resources/keywords/triagem_api.resource
 
 Suite Setup    Aguardar API Disponivel
 Test Setup     Resetar WireMock
@@ -20,129 +23,91 @@ Test Setup     Resetar WireMock
 *** Variables ***
 # CEP de Bauru/SP - resolve via Nominatim (real, nao mockado) para
 # coordenadas dentro da AllowedRegion ampla configurada no compose.
-# Constantes de StatusEmpresa vem de common.resource.
 ${CEP_BAURU}                    17012000
 
 
 *** Test Cases ***
-Import Google Maps - cria empresas com Status AguardandoRevisao
-    [Documentation]    Dispara import com tipo=loja (mapping retorna 2 lugares),
-    ...                valida que ambas foram criadas com Status=AguardandoRevisao,
-    ...                e que aparecem no filtro ?status=aguardando-revisao.
+Import Google Maps - cria candidates pendentes (nao Empresas)
+    [Documentation]    Dispara import com tipo=loja (mapping retorna 2 lugares).
+    ...                Confirma que o response trafega contadores de candidates
+    ...                e que NENHUMA empresa foi criada direto (vs fluxo antigo).
     [Tags]    google-maps    import    e2e
 
     ${resultado}=    Importar Empresas Via Google Maps    cep=${CEP_BAURU}    tipo=loja
     Should Be Equal As Integers    ${resultado['encontrados']}    ${2}
-    Should Be True    ${resultado['criados']} >= ${1}
+    Should Be True    ${resultado['candidatesCriados'] + $resultado['candidatesAtualizados']} >= ${1}
 
     # WireMock recebeu a chamada do client da API (proof of mock-not-real)
     ${chamadas}=    Contar Chamadas WireMock Para    /v1/places:searchNearby
     Should Be True    ${chamadas} >= ${1}
 
-    # Cada empresa criada tem Status=AguardandoRevisao (3)
+    # Itens tem candidateId (nao mais empresaId)
     FOR    ${item}    IN    @{resultado['itens']}
-        Continue For Loop If    '${item['acao']}' != 'criado'
-        ${empresa}=    Buscar Empresa    ${item['empresaId']}
-        Should Be Equal As Strings    ${empresa['status']}    ${STATUS_AGUARDANDO_REVISAO}
+        Should Not Be Empty    ${item['candidateId']}
     END
 
-    # Filtro do painel: aparecem em "aguardando revisao"
-    ${pendentes}=    Filtrar Empresas    status=${FILTRO_STATUS_AGUARDANDO_REVISAO}
-    Should Be True    len($pendentes) >= ${1}
-
-    # NAO aparecem no mapa publico (filtra status=ativo)
-    ${ativas}=    Filtrar Empresas    status=${FILTRO_STATUS_ATIVO}
-    ${ids_pendentes}=    Evaluate    [i['empresaId'] for i in $resultado['itens'] if i['acao'] == 'criado']
-    ${ids_ativas}=    Evaluate    [e['id'] for e in $ativas]
-    FOR    ${id}    IN    @{ids_pendentes}
-        Should Not Contain    ${ids_ativas}    ${id}
+    # Candidates aparecem como Pendente em todos os 3 destinos
+    ${candidate_ids}=    Evaluate    [i['candidateId'] for i in $resultado['itens']]
+    FOR    ${id}    IN    @{candidate_ids}
+        ${c}=    Buscar Candidate Triagem    ${id}
+        Should Be Equal As Strings    ${c['empresaStatus']}    pendente
+        Should Be Equal As Strings    ${c['pontoStatus']}    pendente
+        Should Be Equal As Strings    ${c['telefoneStatus']}    pendente
     END
 
-    # Cleanup
-    FOR    ${id}    IN    @{ids_pendentes}
-        Deletar Empresa    ${id}
+    # Cleanup: rejeita pra nao deixar lixo entre runs
+    FOR    ${id}    IN    @{candidate_ids}
+        Rejeitar Candidate    ${id}    empresa    expected_status=ANY
+        Rejeitar Candidate    ${id}    ponto       expected_status=ANY
+        Rejeitar Candidate    ${id}    telefone    expected_status=ANY
     END
 
 
 Import Google Maps - dedup por GooglePlaceId em segundo import
     [Documentation]    Dois imports consecutivos com o mesmo mapping nao devem criar
-    ...                duplicatas. O segundo enriquece campos vazios ou ignora se ja
-    ...                tudo preenchido. Empresas continuam com Status=AguardandoRevisao.
+    ...                candidates duplicados. O segundo enriquece campos vazios ou
+    ...                ignora se ja tudo preenchido.
     [Tags]    google-maps    import    dedup    e2e
 
     ${primeiro}=    Importar Empresas Via Google Maps    cep=${CEP_BAURU}    tipo=loja
-    ${criados_1}=    Set Variable    ${primeiro['criados']}
-    ${ids_pendentes}=    Evaluate    [i['empresaId'] for i in $primeiro['itens'] if i['acao'] == 'criado']
+    ${ids_primeiro}=    Evaluate    [i['candidateId'] for i in $primeiro['itens']]
 
     Resetar WireMock
 
     ${segundo}=    Importar Empresas Via Google Maps    cep=${CEP_BAURU}    tipo=loja
-    # Segundo import: 0 criadas, todas re-batem via GooglePlaceId
-    Should Be Equal As Integers    ${segundo['criados']}    ${0}
-    Should Be True    ${segundo['atualizados']} + ${segundo['ignorados']} >= ${1}
+    # Segundo import: 0 novos criados, todos batem via GooglePlaceId
+    Should Be Equal As Integers    ${segundo['candidatesCriados']}    ${0}
+    Should Be True    ${segundo['candidatesAtualizados']} + ${segundo['candidatesIgnorados']} >= ${1}
 
     # Cleanup
-    FOR    ${id}    IN    @{ids_pendentes}
-        Deletar Empresa    ${id}
-    END
-
-
-Import Google Maps - aprovacao promove para Status Ativo
-    [Documentation]    Empresa criada via import (Status=AguardandoRevisao) deve poder
-    ...                ser aprovada via PUT com status=1 (Ativo). Apos aprovada, passa
-    ...                a aparecer no filtro ?status=ativo (mapa publico).
-    ...
-    ...                Usa tipo=supermercado pra ter GooglePlaceId distinto dos testes
-    ...                anteriores (tipo=loja). Sem isso, o dedup do backend (re-import
-    ...                de empresas ja existentes vira "atualizado"/"ignorado", nao
-    ...                "criado") deixa o teste sem candidata fresca pra aprovar.
-    [Tags]    google-maps    import    aprovacao    e2e
-
-    ${resultado}=    Importar Empresas Via Google Maps    cep=${CEP_BAURU}    tipo=supermercado
-    ${id_pendente}=    Evaluate    next(i['empresaId'] for i in $resultado['itens'] if i['acao'] == 'criado')
-
-    # Estado inicial: AguardandoRevisao
-    ${antes}=    Buscar Empresa    ${id_pendente}
-    Should Be Equal As Strings    ${antes['status']}    ${STATUS_AGUARDANDO_REVISAO}
-
-    # Admin aprova (mesma keyword usada pra reativar; envia status="ativo")
-    Reativar Empresa    ${id_pendente}
-
-    # Agora aparece no filtro publico (status=ativo)
-    ${depois}=    Buscar Empresa    ${id_pendente}
-    Should Be Equal As Strings    ${depois['status']}    ${STATUS_ATIVO}
-
-    ${ativas}=    Filtrar Empresas    status=${FILTRO_STATUS_ATIVO}
-    ${ids_ativas}=    Evaluate    [e['id'] for e in $ativas]
-    Should Contain    ${ids_ativas}    ${id_pendente}
-
-    # Cleanup (todas inclusive a aprovada)
-    FOR    ${item}    IN    @{resultado['itens']}
-        Continue For Loop If    '${item['acao']}' != 'criado'
-        Deletar Empresa    ${item['empresaId']}
+    FOR    ${id}    IN    @{ids_primeiro}
+        Rejeitar Candidate    ${id}    empresa    expected_status=ANY
+        Rejeitar Candidate    ${id}    ponto       expected_status=ANY
+        Rejeitar Candidate    ${id}    telefone    expected_status=ANY
     END
 
 
 Import Google Maps - tipo sem-filtro omite includedTypes na request
     [Documentation]    Slug "sem-filtro" deve fazer a API enviar request ao Google
-    ...                Places SEM o campo includedTypes (Places API New retorna
-    ...                400 se enviarmos includedTypes vazio). WireMock tem mapping
+    ...                Places SEM o campo includedTypes. WireMock tem mapping
     ...                que casa absent=true em $.includedTypes — retorna 2 lugares
     ...                de tipos distintos.
     [Tags]    google-maps    import    sem-filtro    e2e
 
     ${resultado}=    Importar Empresas Via Google Maps    cep=${CEP_BAURU}    tipo=sem-filtro
     Should Be Equal As Integers    ${resultado['encontrados']}    ${2}
-    Should Be True    ${resultado['criados']} >= ${1}
+    Should Be True    ${resultado['candidatesCriados'] + $resultado['candidatesAtualizados']} >= ${1}
 
     # WireMock recebeu a chamada (proof of mapping absent=true matched)
     ${chamadas}=    Contar Chamadas WireMock Para    /v1/places:searchNearby
     Should Be True    ${chamadas} >= ${1}
 
     # Cleanup
-    ${ids_criados}=    Evaluate    [i['empresaId'] for i in $resultado['itens'] if i['acao'] == 'criado']
-    FOR    ${id}    IN    @{ids_criados}
-        Deletar Empresa    ${id}
+    ${candidate_ids}=    Evaluate    [i['candidateId'] for i in $resultado['itens']]
+    FOR    ${id}    IN    @{candidate_ids}
+        Rejeitar Candidate    ${id}    empresa    expected_status=ANY
+        Rejeitar Candidate    ${id}    ponto       expected_status=ANY
+        Rejeitar Candidate    ${id}    telefone    expected_status=ANY
     END
 
 
