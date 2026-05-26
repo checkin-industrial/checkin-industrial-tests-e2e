@@ -156,7 +156,7 @@ falhar com 403. Solucao: criar um fine-grained PAT com `contents:read` no repo d
 
 ## Suites (estado atual)
 
-A suite cresceu de 3 para 10 arquivos cobrindo API + UI E2E. Inventario:
+A suite cresceu de 3 para 11 arquivos cobrindo API + UI E2E. Inventario:
 
 | # | Arquivo | Cobertura | Tipo |
 |---|---|---|---|
@@ -170,6 +170,7 @@ A suite cresceu de 3 para 10 arquivos cobrindo API + UI E2E. Inventario:
 | 08 | `08__fluentvalidation_400.robot` | FluentValidation rejeita payloads invalidos com HTTP 400 ProblemDetails (RFC 7807): CNPJ malformado, CEP fora do padrao, lat/long fora de range, email invalido, campos obrigatorios vazios, etc. | API |
 | 09 | `09__ui_crud_admin_completo.robot` | UI fluxo admin completo de Empresas: editar via modal, excluir (soft-delete via window.confirm), reativar empresa inativa pelo filtro "inativo" -> botao "Reativar". | UI (Browser) |
 | 10 | `10__csv_import_export.robot` | Import/Export CSV de Empresas e Pontos Institucionais via endpoints admin-only `/api/import/{empresas,pontos-institucionais}/{exportar,exportar-ansi}` + POST. Cobre auth (401 sem X-Api-Key), import com fixtures dummy, export UTF-8 com BOM + ANSI sem BOM, cleanup inline. Regressao do bug do painel#43 (handler de export sem X-Api-Key). | API |
+| 11 | `11__google_maps_triagem.robot` | Pipeline de triagem (api#25): import cria CANDIDATES (nao Empresas), admin promove individualmente cada candidato pra Empresa/Ponto/Telefone ou rejeita por destino. Cobre: 5 testes — candidate pendente em todos os destinos, promote a Empresa marca decidido, mesmo candidate vira Empresa+Ponto+rejeita Telefone, re-decidir retorna 409, filtro status=aprovado lista candidates com algum destino aprovado. | API |
 
 **Fixtures**: `tests/resources/fixtures/wiremock/mappings/*.json` (montados read-only no container)
 e `tests/resources/fixtures/csv/*.csv` (dummy data lida pela suite 10 via `Get Binary File`
