@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Python 3.11
         uses: actions/setup-python@v6
@@ -43,7 +43,7 @@ jobs:
         # actions/checkout exige path RELATIVO a $GITHUB_WORKSPACE.
         # Setamos PAINEL_BUILD_CONTEXT no proximo step pro docker-compose
         # achar o checkout via additional_contexts (suporta env interpolation).
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: checkin-industrial/checkin-industrial-painel
           ref: ${{ vars.PAINEL_REF || 'main' }}
@@ -85,7 +85,7 @@ jobs:
       - name: Get Allure history (from gh-pages)
         if: always()
         continue-on-error: true
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: gh-pages
           path: gh-pages
