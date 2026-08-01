@@ -92,7 +92,7 @@ jobs:
 
       - name: Setup Java (Allure CLI)
         if: always()
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v5.6.0
         with:
           distribution: temurin
           java-version: "21"
